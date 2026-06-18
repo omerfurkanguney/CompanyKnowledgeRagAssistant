@@ -1,0 +1,16 @@
+@CompanyKnowledgeApi_HostAddress = http://localhost:5241
+
+GET {{CompanyKnowledgeApi_HostAddress}}/health
+Accept: application/json
+
+###
+
+GET {{CompanyKnowledgeApi_HostAddress}}/api/system/info
+Accept: application/json
+
+###
+
+GET {{CompanyKnowledgeApi_HostAddress}}/api/system/health
+Accept: application/json
+
+###

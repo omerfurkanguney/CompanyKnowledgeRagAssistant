@@ -1,0 +1,40 @@
+# Build output
+bin/
+obj/
+
+# User-specific IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Test results and coverage
+TestResults/
+coverage/
+coverage.xml
+coverage.cobertura.xml
+*.trx
+
+# Logs
+logs/
+*.log
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# ASP.NET local secrets/config overrides
+appsettings.Local.json
+appsettings.*.Local.json
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
