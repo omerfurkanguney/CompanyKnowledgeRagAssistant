@@ -29,3 +29,8 @@ DELETE {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000
 Accept: application/json
 
 ###
+
+POST {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000-000000000000/process
+Accept: application/json
+
+###

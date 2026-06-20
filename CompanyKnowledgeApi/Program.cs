@@ -1,6 +1,7 @@
 using CompanyKnowledgeApi.Common.Extensions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Features.Documents.UploadDocument;
+using CompanyKnowledgeApi.Infrastructure.Documents;
 using CompanyKnowledgeApi.Infrastructure.Storage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,12 @@ builder.Logging.AddDebug();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 builder.Services.Configure<DocumentStorageOptions>(builder.Configuration.GetSection("DocumentStorage"));
+builder.Services.Configure<DocumentChunkingOptions>(builder.Configuration.GetSection("DocumentChunking"));
 builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
+builder.Services.AddScoped<ITextExtractor, PdfPigTextExtractor>();
+builder.Services.AddScoped<ITextExtractor, OpenXmlDocxTextExtractor>();
+builder.Services.AddScoped<ITextCleaner, TextCleaner>();
+builder.Services.AddScoped<ITextChunker, TextChunker>();
 builder.Services.AddScoped<IValidator<Command>, Validator>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
