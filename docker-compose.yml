@@ -14,16 +14,16 @@ services:
       - ollama
 
   postgres:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:pg18
     container_name: company-knowledge-postgres
     environment:
       POSTGRES_DB: company_knowledge
       POSTGRES_USER: company_knowledge
       POSTGRES_PASSWORD: company_knowledge_dev
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
   ollama:
     image: ollama/ollama:latest
