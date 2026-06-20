@@ -1,28 +1,27 @@
+using CompanyKnowledgeApi.Common.Abstractions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Database.Entities;
 using CompanyKnowledgeApi.Infrastructure.Storage;
 using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 
 namespace CompanyKnowledgeApi.Features.Documents.UploadDocument;
 
-public static class Handler
+public sealed class UploadDocumentCommand(
+    IValidator<UploadDocumentModel> validator,
+    IFileStorage fileStorage,
+    AppDbContext dbContext)
+    : ICommand<UploadDocumentModel, IResult>, IScopedService
 {
-    public static async Task<IResult> Handle(
-        [FromForm] IFormFile file,
-        IValidator<Command> validator,
-        IFileStorage fileStorage,
-        AppDbContext dbContext,
-        CancellationToken cancellationToken)
+    public async Task<IResult> Handle(UploadDocumentModel model, CancellationToken cancellationToken)
     {
-        var command = new Command(file);
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        var validationResult = await validator.ValidateAsync(model, cancellationToken);
 
         if (!validationResult.IsValid)
         {
             return Results.ValidationProblem(validationResult.ToDictionary());
         }
 
+        var file = model.File!;
         var storedFile = await fileStorage.SaveAsync(file, cancellationToken);
 
         var document = new Document
@@ -40,7 +39,7 @@ public static class Handler
         dbContext.Documents.Add(document);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new Response(
+        var response = new UploadDocumentResponse(
             Id: document.Id,
             FileName: document.FileName,
             ContentType: document.ContentType,

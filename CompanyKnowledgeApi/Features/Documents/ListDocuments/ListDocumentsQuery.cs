@@ -1,18 +1,20 @@
+using CompanyKnowledgeApi.Common.Abstractions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CompanyKnowledgeApi.Features.Documents.ListDocuments;
 
-public static class Handler
+public sealed class ListDocumentsQuery(AppDbContext dbContext)
+    : IQuery<IReadOnlyList<ListDocumentsResponse>>, IScopedService
 {
-    public static async Task<IResult> Handle(AppDbContext dbContext, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ListDocumentsResponse>> Handle(CancellationToken cancellationToken)
     {
-        var documents = await dbContext.Documents
+        return await dbContext.Documents
             .AsNoTracking()
             .Where(document => document.Status != DocumentStatus.Deleted)
             .OrderByDescending(document => document.CreatedAt)
-            .Select(document => new Response(
+            .Select(document => new ListDocumentsResponse(
                 document.Id,
                 document.FileName,
                 document.ContentType,
@@ -21,7 +23,5 @@ public static class Handler
                 document.CreatedAt,
                 document.UpdatedAt))
             .ToListAsync(cancellationToken);
-
-        return Results.Ok(documents);
     }
 }

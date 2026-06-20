@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace CompanyKnowledgeApi.Features.Documents.UploadDocument;
 
-public sealed class Validator : AbstractValidator<Command>
+public sealed class UploadDocumentValidator : AbstractValidator<UploadDocumentModel>
 {
-    public Validator(IOptions<DocumentStorageOptions> options)
+    public UploadDocumentValidator(IOptions<DocumentStorageOptions> options)
     {
         var storageOptions = options.Value;
 

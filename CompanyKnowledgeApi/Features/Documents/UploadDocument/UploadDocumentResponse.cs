@@ -1,6 +1,6 @@
 namespace CompanyKnowledgeApi.Features.Documents.UploadDocument;
 
-public sealed record Response(
+public sealed record UploadDocumentResponse(
     Guid Id,
     string FileName,
     string ContentType,

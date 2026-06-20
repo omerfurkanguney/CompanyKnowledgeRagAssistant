@@ -1,6 +1,6 @@
 namespace CompanyKnowledgeApi.Features.System.GetSystemHealth;
 
-public sealed record Response(
+public sealed record GetSystemHealthResponse(
     string Status,
     string Environment,
     DateTimeOffset CheckedAtUtc);

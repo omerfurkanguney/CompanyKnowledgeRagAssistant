@@ -1,3 +1,4 @@
+using CompanyKnowledgeApi.Common.Abstractions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Database.Entities;
 using CompanyKnowledgeApi.Infrastructure.Documents;
@@ -5,19 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CompanyKnowledgeApi.Features.Ingestion.ProcessDocument;
 
-public static class Handler
+public sealed class ProcessDocumentCommand(
+    AppDbContext dbContext,
+    IWebHostEnvironment environment,
+    IEnumerable<ITextExtractor> textExtractors,
+    ITextChunker textChunker)
+    : ICommand<ProcessDocumentModel, IResult>, IScopedService
 {
-    public static async Task<IResult> Handle(
-        Guid id,
-        AppDbContext dbContext,
-        IWebHostEnvironment environment,
-        IEnumerable<ITextExtractor> textExtractors,
-        ITextChunker textChunker,
-        CancellationToken cancellationToken)
+    public async Task<IResult> Handle(ProcessDocumentModel model, CancellationToken cancellationToken)
     {
         var document = await dbContext.Documents
             .Include(document => document.Chunks)
-            .FirstOrDefaultAsync(document => document.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(document => document.Id == model.Id, cancellationToken);
 
         if (document is null || document.Status == DocumentStatus.Deleted)
         {
@@ -77,7 +77,7 @@ public static class Handler
 
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            return Results.Ok(new Response(
+            return Results.Ok(new ProcessDocumentResponse(
                 DocumentId: document.Id,
                 Status: document.Status.ToString(),
                 ChunkCount: chunks.Count,
@@ -91,7 +91,7 @@ public static class Handler
 
             await dbContext.SaveChangesAsync(CancellationToken.None);
 
-            return Results.Ok(new Response(
+            return Results.Ok(new ProcessDocumentResponse(
                 DocumentId: document.Id,
                 Status: document.Status.ToString(),
                 ChunkCount: 0,

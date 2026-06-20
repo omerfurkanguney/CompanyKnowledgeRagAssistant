@@ -1,3 +1,3 @@
 namespace CompanyKnowledgeApi.Features.Documents.UploadDocument;
 
-public sealed record Command(IFormFile? File);
+public sealed record UploadDocumentModel(IFormFile? File);

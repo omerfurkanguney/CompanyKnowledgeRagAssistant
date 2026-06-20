@@ -1,6 +1,6 @@
 namespace CompanyKnowledgeApi.Features.Documents.GetDocumentStatus;
 
-public sealed record Response(
+public sealed record GetDocumentStatusResponse(
     Guid Id,
     string FileName,
     string Status,

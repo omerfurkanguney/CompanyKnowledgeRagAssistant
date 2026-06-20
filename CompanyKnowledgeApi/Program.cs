@@ -23,7 +23,8 @@ builder.Services.AddScoped<ITextExtractor, PdfPigTextExtractor>();
 builder.Services.AddScoped<ITextExtractor, OpenXmlDocxTextExtractor>();
 builder.Services.AddScoped<ITextCleaner, TextCleaner>();
 builder.Services.AddScoped<ITextChunker, TextChunker>();
-builder.Services.AddScoped<IValidator<Command>, Validator>();
+builder.Services.AddScoped<IValidator<UploadDocumentModel>, UploadDocumentValidator>();
+builder.Services.AddScopedServicesFrom(typeof(Program).Assembly);
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
