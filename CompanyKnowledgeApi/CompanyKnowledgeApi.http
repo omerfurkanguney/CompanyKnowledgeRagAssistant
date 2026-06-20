@@ -14,3 +14,18 @@ GET {{CompanyKnowledgeApi_HostAddress}}/api/system/health
 Accept: application/json
 
 ###
+
+GET {{CompanyKnowledgeApi_HostAddress}}/api/documents
+Accept: application/json
+
+###
+
+GET {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000-000000000000/status
+Accept: application/json
+
+###
+
+DELETE {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###

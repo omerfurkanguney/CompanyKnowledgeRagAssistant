@@ -1,3 +1,4 @@
+using CompanyKnowledgeApi.Features.Documents;
 using CompanyKnowledgeApi.Features.System;
 
 namespace CompanyKnowledgeApi.Common.Extensions;
@@ -9,6 +10,7 @@ public static class EndpointRouteBuilderExtensions
         var api = app.MapGroup("/api");
 
         api.MapSystemEndpoints();
+        api.MapDocumentEndpoints();
 
         return app;
     }

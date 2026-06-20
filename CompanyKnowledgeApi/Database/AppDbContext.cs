@@ -49,8 +49,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.ToTable("documents");
             entity.HasKey(document => document.Id);
             entity.Property(document => document.FileName).HasMaxLength(260).IsRequired();
+            entity.Property(document => document.StoredFileName).HasMaxLength(300).IsRequired();
+            entity.Property(document => document.StoragePath).HasMaxLength(1000).IsRequired();
             entity.Property(document => document.ContentType).HasMaxLength(120).IsRequired();
             entity.Property(document => document.Status).HasConversion<string>().HasMaxLength(40).IsRequired();
+            entity.Property(document => document.FailureReason).HasMaxLength(1000);
             entity.HasMany(document => document.Chunks)
                 .WithOne(chunk => chunk.Document)
                 .HasForeignKey(chunk => chunk.DocumentId)

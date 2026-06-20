@@ -1,5 +1,8 @@
 using CompanyKnowledgeApi.Common.Extensions;
 using CompanyKnowledgeApi.Database;
+using CompanyKnowledgeApi.Features.Documents.UploadDocument;
+using CompanyKnowledgeApi.Infrastructure.Storage;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -12,6 +15,9 @@ builder.Logging.AddDebug();
 
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+builder.Services.Configure<DocumentStorageOptions>(builder.Configuration.GetSection("DocumentStorage"));
+builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
+builder.Services.AddScoped<IValidator<Command>, Validator>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

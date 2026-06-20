@@ -25,6 +25,9 @@ coverage.cobertura.xml
 logs/
 *.log
 
+# Uploaded local files
+storage/
+
 # Local environment files
 .env
 .env.*
