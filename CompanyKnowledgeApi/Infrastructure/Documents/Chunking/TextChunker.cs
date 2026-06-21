@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Options;
+using CompanyKnowledgeApi.Infrastructure.Documents.Cleaning;
+using CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 
-namespace CompanyKnowledgeApi.Infrastructure.Documents;
+namespace CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
 
 public sealed class TextChunker(ITextCleaner textCleaner, IOptions<DocumentChunkingOptions> options) : ITextChunker
 {

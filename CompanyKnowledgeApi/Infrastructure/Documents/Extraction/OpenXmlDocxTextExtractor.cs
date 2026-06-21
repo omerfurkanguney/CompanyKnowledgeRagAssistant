@@ -1,7 +1,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace CompanyKnowledgeApi.Infrastructure.Documents;
+namespace CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 
 public sealed class OpenXmlDocxTextExtractor : ITextExtractor
 {

@@ -1,7 +1,9 @@
 using CompanyKnowledgeApi.Common.Extensions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Features.Documents.UploadDocument;
-using CompanyKnowledgeApi.Infrastructure.Documents;
+using CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
+using CompanyKnowledgeApi.Infrastructure.Documents.Cleaning;
+using CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 using CompanyKnowledgeApi.Infrastructure.Storage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;

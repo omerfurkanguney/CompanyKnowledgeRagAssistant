@@ -1,7 +1,8 @@
 using CompanyKnowledgeApi.Common.Abstractions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Database.Entities;
-using CompanyKnowledgeApi.Infrastructure.Documents;
+using CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
+using CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 using Microsoft.EntityFrameworkCore;
 
 namespace CompanyKnowledgeApi.Features.Ingestion.ProcessDocument;

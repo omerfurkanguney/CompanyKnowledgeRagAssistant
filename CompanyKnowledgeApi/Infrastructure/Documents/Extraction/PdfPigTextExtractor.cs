@@ -1,6 +1,6 @@
 using UglyToad.PdfPig;
 
-namespace CompanyKnowledgeApi.Infrastructure.Documents;
+namespace CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 
 public sealed class PdfPigTextExtractor : ITextExtractor
 {

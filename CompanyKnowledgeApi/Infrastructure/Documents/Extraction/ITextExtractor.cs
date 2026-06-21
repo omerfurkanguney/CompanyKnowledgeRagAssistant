@@ -1,4 +1,4 @@
-namespace CompanyKnowledgeApi.Infrastructure.Documents;
+namespace CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 
 public interface ITextExtractor
 {

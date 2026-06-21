@@ -1,4 +1,4 @@
-namespace CompanyKnowledgeApi.Infrastructure.Documents;
+namespace CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
 
 public sealed class DocumentChunkingOptions
 {

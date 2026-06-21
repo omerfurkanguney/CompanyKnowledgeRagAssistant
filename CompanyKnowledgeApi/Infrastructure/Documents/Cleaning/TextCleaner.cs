@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CompanyKnowledgeApi.Infrastructure.Documents;
+namespace CompanyKnowledgeApi.Infrastructure.Documents.Cleaning;
 
 public sealed partial class TextCleaner : ITextCleaner
 {
