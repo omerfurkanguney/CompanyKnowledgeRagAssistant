@@ -1,3 +1,4 @@
+using CompanyKnowledgeApi.Features.Ingestion.EmbedDocument;
 using CompanyKnowledgeApi.Features.Ingestion.ProcessDocument;
 
 namespace CompanyKnowledgeApi.Features.Ingestion;
@@ -10,6 +11,7 @@ public static class IngestionEndpoints
             .WithTags("Documents");
 
         group.MapProcessDocumentEndpoint();
+        group.MapEmbedDocumentEndpoint();
 
         return app;
     }

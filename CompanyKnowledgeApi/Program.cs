@@ -1,6 +1,7 @@
 using CompanyKnowledgeApi.Common.Extensions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Features.Documents.UploadDocument;
+using CompanyKnowledgeApi.Infrastructure.Ai.Embeddings;
 using CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
 using CompanyKnowledgeApi.Infrastructure.Documents.Cleaning;
 using CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
@@ -20,12 +21,21 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 builder.Services.Configure<DocumentStorageOptions>(builder.Configuration.GetSection("DocumentStorage"));
 builder.Services.Configure<DocumentChunkingOptions>(builder.Configuration.GetSection("DocumentChunking"));
+builder.Services.Configure<EmbeddingOptions>(builder.Configuration.GetSection("AI"));
 builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
 builder.Services.AddScoped<ITextExtractor, PdfPigTextExtractor>();
 builder.Services.AddScoped<ITextExtractor, OpenXmlDocxTextExtractor>();
 builder.Services.AddScoped<ITextCleaner, TextCleaner>();
 builder.Services.AddScoped<ITextChunker, TextChunker>();
 builder.Services.AddScoped<IValidator<UploadDocumentModel>, UploadDocumentValidator>();
+builder.Services.AddHttpClient<IEmbeddingService, OllamaEmbeddingService>((serviceProvider, httpClient) =>
+{
+    var options = serviceProvider
+        .GetRequiredService<Microsoft.Extensions.Options.IOptions<EmbeddingOptions>>()
+        .Value;
+
+    httpClient.BaseAddress = new Uri(options.OllamaBaseUrl);
+});
 builder.Services.AddScopedServicesFrom(typeof(Program).Assembly);
 builder.Services.AddDbContext<AppDbContext>(options =>
 {

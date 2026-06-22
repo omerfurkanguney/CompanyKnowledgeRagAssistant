@@ -34,3 +34,8 @@ POST {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000-0
 Accept: application/json
 
 ###
+
+POST {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000-000000000000/embed
+Accept: application/json
+
+###
