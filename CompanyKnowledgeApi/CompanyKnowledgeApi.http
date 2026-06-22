@@ -50,3 +50,14 @@ Accept: application/json
 }
 
 ###
+
+POST {{CompanyKnowledgeApi_HostAddress}}/api/chat/ask
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "Yıllık izin kaç gün önceden talep edilir?",
+  "topK": 5
+}
+
+###

@@ -1,3 +1,4 @@
+using CompanyKnowledgeApi.Features.Chat;
 using CompanyKnowledgeApi.Features.Documents;
 using CompanyKnowledgeApi.Features.Ingestion;
 using CompanyKnowledgeApi.Features.Search;
@@ -15,6 +16,7 @@ public static class EndpointRouteBuilderExtensions
         api.MapDocumentEndpoints();
         api.MapIngestionEndpoints();
         api.MapSearchEndpoints();
+        api.MapChatEndpoints();
 
         return app;
     }
