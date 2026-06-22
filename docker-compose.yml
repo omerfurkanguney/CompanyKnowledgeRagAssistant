@@ -7,6 +7,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=company_knowledge;Username=company_knowledge;Password=company_knowledge_dev
+      AI__OllamaBaseUrl: http://ollama:11434
+      AI__EmbeddingModel: bge-m3
+      AI__ExpectedDimensions: 1024
+      AI__ChatModel: qwen2.5:1.5b
+      AI__Temperature: 0.2
+      AI__RequestTimeoutSeconds: 300
+      AI__MaxOutputTokens: 256
     ports:
       - "8080:8080"
     depends_on:

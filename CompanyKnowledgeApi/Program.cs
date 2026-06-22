@@ -49,6 +49,7 @@ builder.Services.AddHttpClient<IChatCompletionService, OllamaChatCompletionServi
         .Value;
 
     httpClient.BaseAddress = new Uri(options.OllamaBaseUrl);
+    httpClient.Timeout = TimeSpan.FromSeconds(options.RequestTimeoutSeconds);
 });
 builder.Services.AddScopedServicesFrom(typeof(Program).Assembly);
 builder.Services.AddDbContext<AppDbContext>(options =>

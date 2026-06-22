@@ -22,7 +22,9 @@ public sealed class OllamaChatCompletionService(HttpClient httpClient, IOptions<
             Model: _options.ChatModel,
             Messages: messages.Select(message => new OllamaChatMessage(message.Role, message.Content)).ToList(),
             Stream: false,
-            Options: new OllamaChatRequestOptions(_options.Temperature));
+            Options: new OllamaChatRequestOptions(
+                Temperature: _options.Temperature,
+                NumPredict: _options.MaxOutputTokens));
 
         var response = await httpClient.PostAsJsonAsync("/api/chat", request, cancellationToken);
 
@@ -54,7 +56,8 @@ public sealed class OllamaChatCompletionService(HttpClient httpClient, IOptions<
         [property: JsonPropertyName("options")] OllamaChatRequestOptions Options);
 
     private sealed record OllamaChatRequestOptions(
-        [property: JsonPropertyName("temperature")] double Temperature);
+        [property: JsonPropertyName("temperature")] double Temperature,
+        [property: JsonPropertyName("num_predict")] int NumPredict);
 
     private sealed record OllamaChatMessage(
         [property: JsonPropertyName("role")] string Role,
