@@ -39,3 +39,14 @@ POST {{CompanyKnowledgeApi_HostAddress}}/api/documents/00000000-0000-0000-0000-0
 Accept: application/json
 
 ###
+
+POST {{CompanyKnowledgeApi_HostAddress}}/api/search/semantic
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "Yıllık izin kaç gün önceden talep edilir?",
+  "topK": 5
+}
+
+###

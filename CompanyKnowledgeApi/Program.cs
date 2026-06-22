@@ -1,6 +1,7 @@
 using CompanyKnowledgeApi.Common.Extensions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Features.Documents.UploadDocument;
+using CompanyKnowledgeApi.Features.Search.SemanticSearch;
 using CompanyKnowledgeApi.Infrastructure.Ai.Embeddings;
 using CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
 using CompanyKnowledgeApi.Infrastructure.Documents.Cleaning;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<ITextExtractor, OpenXmlDocxTextExtractor>();
 builder.Services.AddScoped<ITextCleaner, TextCleaner>();
 builder.Services.AddScoped<ITextChunker, TextChunker>();
 builder.Services.AddScoped<IValidator<UploadDocumentModel>, UploadDocumentValidator>();
+builder.Services.AddScoped<IValidator<SemanticSearchModel>, SemanticSearchValidator>();
 builder.Services.AddHttpClient<IEmbeddingService, OllamaEmbeddingService>((serviceProvider, httpClient) =>
 {
     var options = serviceProvider

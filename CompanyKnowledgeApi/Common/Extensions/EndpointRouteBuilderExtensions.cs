@@ -1,5 +1,6 @@
 using CompanyKnowledgeApi.Features.Documents;
 using CompanyKnowledgeApi.Features.Ingestion;
+using CompanyKnowledgeApi.Features.Search;
 using CompanyKnowledgeApi.Features.System;
 
 namespace CompanyKnowledgeApi.Common.Extensions;
@@ -13,6 +14,7 @@ public static class EndpointRouteBuilderExtensions
         api.MapSystemEndpoints();
         api.MapDocumentEndpoints();
         api.MapIngestionEndpoints();
+        api.MapSearchEndpoints();
 
         return app;
     }
