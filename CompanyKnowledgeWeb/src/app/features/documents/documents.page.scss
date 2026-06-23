@@ -29,6 +29,48 @@ table {
   font-weight: 700;
 }
 
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  white-space: nowrap;
+}
+
+.status-cell .muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-cell mat-chip {
+  min-height: 28px;
+}
+
+.status-uploaded {
+  background: #eef2f6;
+}
+
+.status-processing,
+.status-embedding {
+  background: #fff4cc;
+}
+
+.status-processed {
+  background: #e0f2fe;
+}
+
+.status-indexed {
+  background: #dcfae6;
+}
+
+.status-failed {
+  background: #fee4e2;
+}
+
+.status-deleted {
+  background: #f2f4f7;
+}
+
 .empty-documents {
   display: grid;
   place-items: center;

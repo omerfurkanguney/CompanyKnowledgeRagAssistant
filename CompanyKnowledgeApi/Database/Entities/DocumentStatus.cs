@@ -4,6 +4,8 @@ public enum DocumentStatus
 {
     Uploaded,
     Processing,
+    Processed,
+    Embedding,
     Indexed,
     Failed,
     Deleted

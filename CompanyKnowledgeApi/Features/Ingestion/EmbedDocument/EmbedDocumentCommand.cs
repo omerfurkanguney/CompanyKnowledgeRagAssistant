@@ -26,6 +26,11 @@ public sealed class EmbedDocumentCommand(AppDbContext dbContext, IEmbeddingServi
             return Results.BadRequest("Document has no chunks. Process the document before embedding.");
         }
 
+        document.Status = DocumentStatus.Embedding;
+        document.FailureReason = null;
+        document.UpdatedAt = DateTimeOffset.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
         try
         {
             var chunks = document.Chunks

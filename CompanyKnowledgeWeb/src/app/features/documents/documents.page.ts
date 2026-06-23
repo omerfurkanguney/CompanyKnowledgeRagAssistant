@@ -67,7 +67,7 @@ export class DocumentsPage implements OnInit {
       }))
       .subscribe({
         next: () => {
-          this.snackBar.open('Doküman yüklendi.', 'Kapat', { duration: 3000 });
+          this.snackBar.open('Doküman yüklendi. Process işlemi bekliyor.', 'Kapat', { duration: 3000 });
           this.loadDocuments();
         },
         error: () => this.snackBar.open('Upload başarısız.', 'Kapat', { duration: 4000 }),
@@ -75,11 +75,11 @@ export class DocumentsPage implements OnInit {
   }
 
   process(document: DocumentItem): void {
-    this.runDocumentAction(document.id, () => this.api.processDocument(document.id), 'Doküman işlendi.');
+    this.runDocumentAction(document.id, () => this.api.processDocument(document.id), 'Doküman işlendi. Embedding için hazır.');
   }
 
   embed(document: DocumentItem): void {
-    this.runDocumentAction(document.id, () => this.api.embedDocument(document.id), 'Embedding tamamlandı.');
+    this.runDocumentAction(document.id, () => this.api.embedDocument(document.id), 'Embedding tamamlandı. Doküman arama için hazır.');
   }
 
   delete(document: DocumentItem): void {
@@ -94,17 +94,57 @@ export class DocumentsPage implements OnInit {
     return `${(sizeInBytes / 1024 / 1024).toFixed(1)} MB`;
   }
 
+  statusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      Uploaded: 'Yüklendi',
+      Processing: 'İşleniyor',
+      Processed: 'İşlendi',
+      Embedding: 'Embedding',
+      Indexed: 'Hazır',
+      Failed: 'Hatalı',
+      Deleted: 'Silindi',
+    };
+
+    return labels[status] ?? status;
+  }
+
+  statusHint(status: string): string {
+    const hints: Record<string, string> = {
+      Uploaded: 'Process bekliyor',
+      Processing: 'Chunk üretiliyor',
+      Processed: 'Embed bekliyor',
+      Embedding: 'Vektör üretiliyor',
+      Indexed: 'RAG için hazır',
+      Failed: 'Tekrar denenebilir',
+      Deleted: 'Pasif',
+    };
+
+    return hints[status] ?? '';
+  }
+
+  statusClass(status: string): string {
+    return `status-${status.toLowerCase()}`;
+  }
+
+  canProcess(document: DocumentItem): boolean {
+    return document.status === 'Uploaded' || document.status === 'Failed';
+  }
+
+  canEmbed(document: DocumentItem): boolean {
+    return document.status === 'Processed' || document.status === 'Failed';
+  }
+
   private runDocumentAction<T>(documentId: string, action: () => Observable<T>, successMessage: string): void {
     this.workingDocumentId.set(documentId);
 
     action()
       .pipe(finalize(() => this.workingDocumentId.set(null)))
       .subscribe({
-      next: () => {
-        this.snackBar.open(successMessage, 'Kapat', { duration: 3000 });
-        this.loadDocuments();
-      },
-      error: () => this.snackBar.open('İşlem başarısız.', 'Kapat', { duration: 4000 }),
-    });
+        next: () => {
+          this.snackBar.open(successMessage, 'Kapat', { duration: 3000 });
+          this.loadDocuments();
+        },
+        error: () => this.snackBar.open('İşlem başarısız.', 'Kapat', { duration: 4000 }),
+      });
   }
 }

@@ -72,7 +72,7 @@ public sealed class ProcessDocumentCommand(
                 });
             }
 
-            document.Status = chunks.Count > 0 ? DocumentStatus.Indexed : DocumentStatus.Failed;
+            document.Status = chunks.Count > 0 ? DocumentStatus.Processed : DocumentStatus.Failed;
             document.FailureReason = chunks.Count > 0 ? null : "No extractable text was found in the document.";
             document.UpdatedAt = DateTimeOffset.UtcNow;
 
