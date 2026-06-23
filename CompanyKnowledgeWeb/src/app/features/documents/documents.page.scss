@@ -1,0 +1,55 @@
+.documents-header {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+
+.header-actions,
+.row-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.table-panel {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+}
+
+.file-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 260px;
+}
+
+.file-name {
+  font-weight: 700;
+}
+
+.empty-documents {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  min-height: 260px;
+  color: #667085;
+}
+
+.empty-documents mat-icon {
+  width: 44px;
+  height: 44px;
+  font-size: 44px;
+}
+
+@media (max-width: 760px) {
+  .documents-header {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions {
+    justify-content: start;
+  }
+}

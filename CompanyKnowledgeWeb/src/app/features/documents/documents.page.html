@@ -1,0 +1,84 @@
+<section class="page">
+  <header class="page-header documents-header">
+    <div>
+      <h1 class="page-title">Documents</h1>
+      <p class="page-subtitle">PDF/DOCX yükle, chunk üret ve embedding işlemini başlat.</p>
+    </div>
+    <div class="header-actions">
+      <input #fileInput type="file" accept=".pdf,.docx" hidden (change)="upload($event)">
+      <button mat-flat-button type="button" (click)="fileInput.click()" [disabled]="uploading()">
+        <mat-icon>upload_file</mat-icon>
+        Upload
+      </button>
+      <button mat-stroked-button type="button" (click)="loadDocuments()">
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <section class="surface table-panel">
+    @if (loading() || uploading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <table mat-table [dataSource]="documents()">
+      <ng-container matColumnDef="fileName">
+        <th mat-header-cell *matHeaderCellDef>Doküman</th>
+        <td mat-cell *matCellDef="let document">
+          <div class="file-cell">
+            <mat-icon>description</mat-icon>
+            <div>
+              <div class="file-name">{{ document.fileName }}</div>
+              <div class="muted">{{ document.contentType }}</div>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let document">
+          <mat-chip>{{ document.status }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="size">
+        <th mat-header-cell *matHeaderCellDef>Boyut</th>
+        <td mat-cell *matCellDef="let document">{{ formatSize(document.sizeInBytes) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Oluşturma</th>
+        <td mat-cell *matCellDef="let document">{{ document.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let document">
+          <div class="row-actions">
+            <button mat-icon-button type="button" title="Process" (click)="process(document)" [disabled]="workingDocumentId() === document.id">
+              <mat-icon>data_object</mat-icon>
+            </button>
+            <button mat-icon-button type="button" title="Embed" (click)="embed(document)" [disabled]="workingDocumentId() === document.id">
+              <mat-icon>hub</mat-icon>
+            </button>
+            <button mat-icon-button type="button" title="Delete" (click)="delete(document)" [disabled]="workingDocumentId() === document.id">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (!loading() && documents().length === 0) {
+      <div class="empty-documents">
+        <mat-icon>folder_off</mat-icon>
+        <span>Henüz doküman yok.</span>
+      </div>
+    }
+  </section>
+</section>

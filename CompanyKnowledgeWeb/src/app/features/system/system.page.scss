@@ -1,0 +1,39 @@
+.system-header {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+
+.system-panel {
+  overflow: hidden;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1px;
+  background: #dde3ea;
+}
+
+.metric {
+  display: grid;
+  gap: 8px;
+  min-height: 116px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.metric span {
+  color: #667085;
+  font-size: 13px;
+}
+
+.metric strong {
+  font-size: 17px;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

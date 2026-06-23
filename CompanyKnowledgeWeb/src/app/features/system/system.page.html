@@ -1,0 +1,45 @@
+<section class="page">
+  <header class="page-header system-header">
+    <div>
+      <h1 class="page-title">System</h1>
+      <p class="page-subtitle">API, health ve runtime bilgileri.</p>
+    </div>
+    <button mat-stroked-button type="button" (click)="refresh()">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </header>
+
+  <section class="surface system-panel">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <div class="metrics">
+      <div class="metric">
+        <span>API Base URL</span>
+        <strong>{{ apiBaseUrl }}</strong>
+      </div>
+      <div class="metric">
+        <span>API</span>
+        <strong>{{ info()?.name ?? '-' }}</strong>
+      </div>
+      <div class="metric">
+        <span>Environment</span>
+        <strong>{{ info()?.environment ?? health()?.environment ?? '-' }}</strong>
+      </div>
+      <div class="metric">
+        <span>Health</span>
+        <strong>{{ health()?.status ?? rootHealth() ?? '-' }}</strong>
+      </div>
+      <div class="metric">
+        <span>Checked</span>
+        <strong>{{ health()?.checkedAtUtc ? (health()!.checkedAtUtc | date:'dd.MM.yyyy HH:mm:ss') : '-' }}</strong>
+      </div>
+      <div class="metric">
+        <span>Version</span>
+        <strong>{{ info()?.version ?? '-' }}</strong>
+      </div>
+    </div>
+  </section>
+</section>
