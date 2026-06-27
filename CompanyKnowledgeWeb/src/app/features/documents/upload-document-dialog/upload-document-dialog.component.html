@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>Yeni Doküman</h2>
+
+<mat-dialog-content class="dialog-content">
+  <label class="file-drop">
+    <input type="file" accept=".pdf,.docx" hidden (change)="selectFile($event)">
+    <mat-icon>upload_file</mat-icon>
+    <strong>{{ selectedFile()?.name ?? 'PDF veya DOCX dosyası seç' }}</strong>
+    <span>Desteklenen dosya türleri: PDF, DOCX</span>
+  </label>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Doküman Türü</mat-label>
+    <mat-select [formControl]="documentType">
+      @for (type of documentTypes; track type.value) {
+        <mat-option [value]="type.value">{{ type.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Departman</mat-label>
+    <mat-select [formControl]="department">
+      @for (item of departments; track item.value) {
+        <mat-option [value]="item.value">{{ item.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Vazgeç</button>
+  <button mat-flat-button type="button" (click)="submit()" [disabled]="!selectedFile()">
+    <mat-icon>cloud_upload</mat-icon>
+    Yükle
+  </button>
+</mat-dialog-actions>

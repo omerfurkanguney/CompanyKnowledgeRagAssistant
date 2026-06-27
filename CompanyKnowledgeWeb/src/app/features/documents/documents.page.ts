@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -9,6 +10,10 @@ import { MatTableModule } from '@angular/material/table';
 import { Observable, finalize } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { DocumentItem } from '../../core/api.models';
+import {
+  UploadDocumentDialogComponent,
+  UploadDocumentDialogResult,
+} from './upload-document-dialog/upload-document-dialog.component';
 
 @Component({
   selector: 'app-documents-page',
@@ -16,6 +21,7 @@ import { DocumentItem } from '../../core/api.models';
     DatePipe,
     MatButtonModule,
     MatChipsModule,
+    MatDialogModule,
     MatIconModule,
     MatProgressBarModule,
     MatSnackBarModule,
@@ -27,6 +33,7 @@ import { DocumentItem } from '../../core/api.models';
 })
 export class DocumentsPage implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly documents = signal<DocumentItem[]>([]);
@@ -58,21 +65,25 @@ export class DocumentsPage implements OnInit {
       });
   }
 
-  upload(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  openUploadDialog(): void {
+    this.dialog
+      .open<UploadDocumentDialogComponent, void, UploadDocumentDialogResult>(UploadDocumentDialogComponent, {
+        width: '560px',
+        autoFocus: false,
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          this.upload(result);
+        }
+      });
+  }
 
-    if (!file) {
-      return;
-    }
-
+  upload(result: UploadDocumentDialogResult): void {
     this.uploading.set(true);
     this.api
-      .uploadDocument(file)
-      .pipe(finalize(() => {
-        this.uploading.set(false);
-        input.value = '';
-      }))
+      .uploadDocument(result.file)
+      .pipe(finalize(() => this.uploading.set(false)))
       .subscribe({
         next: () => {
           this.snackBar.open('Doküman yüklendi. Process işlemi bekliyor.', 'Kapat', { duration: 3000 });

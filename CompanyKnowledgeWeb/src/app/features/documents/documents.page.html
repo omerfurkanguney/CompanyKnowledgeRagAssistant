@@ -5,7 +5,7 @@
       <div>
         <div class="metric-label">Toplam Doküman</div>
         <div class="metric-value">{{ documents().length }}</div>
-        <div class="metric-trend">↑ canlı liste</div>
+        <div class="metric-trend">canlı liste</div>
       </div>
     </article>
 
@@ -49,8 +49,7 @@
         <button mat-stroked-button type="button">Durum <mat-icon>expand_more</mat-icon></button>
         <span class="filter-spacer"></span>
         <button mat-stroked-button type="button"><mat-icon>download</mat-icon>Dışa Aktar</button>
-        <input #fileInput type="file" accept=".pdf,.docx" hidden (change)="upload($event)">
-        <button mat-flat-button class="new-document-button" type="button" (click)="fileInput.click()" [disabled]="uploading()">
+        <button mat-flat-button class="new-document-button" type="button" (click)="openUploadDialog()" [disabled]="uploading()">
           <mat-icon>add_circle</mat-icon>
           Yeni Doküman
         </button>
