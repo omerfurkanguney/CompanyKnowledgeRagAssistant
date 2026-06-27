@@ -1,0 +1,36 @@
+<div class="sidebar-content" [class.collapsed]="collapsed">
+  <div class="brand">
+    <span class="brand-mark">A</span>
+    <div class="brand-copy">
+      <div class="brand-title">ACME</div>
+      <div class="brand-subtitle">Knowledge Assistant</div>
+    </div>
+  </div>
+
+  <mat-nav-list class="nav-list">
+    @for (item of navItems; track item.label) {
+      <a
+        mat-list-item
+        [routerLink]="item.route"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: item.route !== '/chat' }">
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span matListItemTitle class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </mat-nav-list>
+
+  <div class="tenant-card">
+    <span class="tenant-icon"><mat-icon>apartment</mat-icon></span>
+    <div>
+      <strong>ACME A.Ş.</strong>
+      <span>Kurumsal Plan</span>
+    </div>
+    <mat-icon>expand_more</mat-icon>
+  </div>
+
+  <button mat-button type="button" class="collapse-button" (click)="toggleCollapsed.emit()">
+    <mat-icon>{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    <span>Menüyü Daralt</span>
+  </button>
+</div>

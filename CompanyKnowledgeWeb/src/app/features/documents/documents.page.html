@@ -1,97 +1,192 @@
-<section class="page">
-  <header class="page-header documents-header">
-    <div>
-      <h1 class="page-title">Documents</h1>
-      <p class="page-subtitle">PDF/DOCX yükle, chunk üret ve embedding işlemini başlat.</p>
-    </div>
-    <div class="header-actions">
-      <input #fileInput type="file" accept=".pdf,.docx" hidden (change)="upload($event)">
-      <button mat-flat-button type="button" (click)="fileInput.click()" [disabled]="uploading()">
-        <mat-icon>upload_file</mat-icon>
-        Upload
-      </button>
-      <button mat-stroked-button type="button" (click)="loadDocuments()">
-        <mat-icon>refresh</mat-icon>
-        Refresh
-      </button>
-    </div>
-  </header>
-
-  <section class="surface table-panel">
-    @if (loading() || uploading()) {
-      <mat-progress-bar mode="indeterminate" />
-    }
-
-    <table mat-table [dataSource]="documents()">
-      <ng-container matColumnDef="fileName">
-        <th mat-header-cell *matHeaderCellDef>Doküman</th>
-        <td mat-cell *matCellDef="let document">
-          <div class="file-cell">
-            <mat-icon>description</mat-icon>
-            <div>
-              <div class="file-name">{{ document.fileName }}</div>
-              <div class="muted">{{ document.contentType }}</div>
-            </div>
-          </div>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let document">
-          <div class="status-cell">
-            <mat-chip [class]="statusClass(document.status)">{{ statusLabel(document.status) }}</mat-chip>
-            <span class="muted">{{ statusHint(document.status) }}</span>
-          </div>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="size">
-        <th mat-header-cell *matHeaderCellDef>Boyut</th>
-        <td mat-cell *matCellDef="let document">{{ formatSize(document.sizeInBytes) }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="createdAt">
-        <th mat-header-cell *matHeaderCellDef>Oluşturma</th>
-        <td mat-cell *matCellDef="let document">{{ document.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let document">
-          <div class="row-actions">
-            <button
-              mat-icon-button
-              type="button"
-              title="Process"
-              (click)="process(document)"
-              [disabled]="workingDocumentId() === document.id || !canProcess(document)">
-              <mat-icon>data_object</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              type="button"
-              title="Embed"
-              (click)="embed(document)"
-              [disabled]="workingDocumentId() === document.id || !canEmbed(document)">
-              <mat-icon>hub</mat-icon>
-            </button>
-            <button mat-icon-button type="button" title="Delete" (click)="delete(document)" [disabled]="workingDocumentId() === document.id">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-
-    @if (!loading() && documents().length === 0) {
-      <div class="empty-documents">
-        <mat-icon>folder_off</mat-icon>
-        <span>Henüz doküman yok.</span>
+<section class="documents-dashboard">
+  <section class="metrics-grid">
+    <article class="surface metric-card">
+      <span class="metric-icon"><mat-icon>description</mat-icon></span>
+      <div>
+        <div class="metric-label">Toplam Doküman</div>
+        <div class="metric-value">{{ documents().length }}</div>
+        <div class="metric-trend">↑ canlı liste</div>
       </div>
-    }
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon success"><mat-icon>verified</mat-icon></span>
+      <div>
+        <div class="metric-label">İndekslenen</div>
+        <div class="metric-value">{{ indexedCount() }}</div>
+        <div class="metric-trend">RAG için hazır</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon warning"><mat-icon>schedule</mat-icon></span>
+      <div>
+        <div class="metric-label">İşleniyor</div>
+        <div class="metric-value">{{ processingCount() }}</div>
+        <div class="metric-trend warning-text">Aktif işlem</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon purple"><mat-icon>folder</mat-icon></span>
+      <div>
+        <div class="metric-label">Kategori</div>
+        <div class="metric-value">{{ categoryCount() }}</div>
+        <div class="metric-trend">türetilmiş</div>
+      </div>
+    </article>
   </section>
+
+  <div class="documents-layout">
+    <main class="main-column">
+      <section class="surface filter-bar">
+        <div class="search-control">
+          <mat-icon>search</mat-icon>
+          <input type="search" placeholder="Dosya adı, etiket veya içerik ara..." />
+        </div>
+        <button mat-stroked-button type="button">Kategori <mat-icon>expand_more</mat-icon></button>
+        <button mat-stroked-button type="button">Dosya Türü <mat-icon>expand_more</mat-icon></button>
+        <button mat-stroked-button type="button">Durum <mat-icon>expand_more</mat-icon></button>
+        <span class="filter-spacer"></span>
+        <button mat-stroked-button type="button"><mat-icon>download</mat-icon>Dışa Aktar</button>
+        <input #fileInput type="file" accept=".pdf,.docx" hidden (change)="upload($event)">
+        <button mat-flat-button class="new-document-button" type="button" (click)="fileInput.click()" [disabled]="uploading()">
+          <mat-icon>add_circle</mat-icon>
+          Yeni Doküman
+        </button>
+      </section>
+
+      <section class="surface table-panel">
+        @if (loading() || uploading()) {
+          <mat-progress-bar mode="indeterminate" />
+        }
+
+        <div class="table-title">Doküman Listesi</div>
+
+        <table mat-table [dataSource]="documents()">
+          <ng-container matColumnDef="fileName">
+            <th mat-header-cell *matHeaderCellDef>Dosya Adı</th>
+            <td mat-cell *matCellDef="let document" (click)="selectDocument(document)">
+              <div class="file-cell">
+                <span class="file-icon" [class.word]="documentType(document) === 'DOCX'">{{ documentType(document) }}</span>
+                <div>
+                  <div class="file-name">{{ document.fileName }}</div>
+                  <div class="muted">{{ documentCategory(document) }}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Tür</th>
+            <td mat-cell *matCellDef="let document">{{ documentType(document) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Yüklenme Tarihi</th>
+            <td mat-cell *matCellDef="let document">{{ document.createdAt | date:'dd.MM.yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Durum</th>
+            <td mat-cell *matCellDef="let document">
+              <mat-chip [class]="statusClass(document.status)">{{ statusLabel(document.status) }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>İşlemler</th>
+            <td mat-cell *matCellDef="let document">
+              <div class="row-actions">
+                <button mat-icon-button type="button" title="Process" (click)="process(document)" [disabled]="workingDocumentId() === document.id || !canProcess(document)">
+                  <mat-icon>data_object</mat-icon>
+                </button>
+                <button mat-icon-button type="button" title="Embed" (click)="embed(document)" [disabled]="workingDocumentId() === document.id || !canEmbed(document)">
+                  <mat-icon>hub</mat-icon>
+                </button>
+                <button mat-icon-button type="button" title="Sil" (click)="delete(document)" [disabled]="workingDocumentId() === document.id">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected-row]="selectedDocument()?.id === row.id"></tr>
+        </table>
+
+        @if (!loading() && documents().length === 0) {
+          <div class="empty-documents">
+            <mat-icon>folder_off</mat-icon>
+            <span>Henüz doküman yok.</span>
+          </div>
+        }
+      </section>
+    </main>
+
+    <aside class="details-column">
+      <section class="surface details-panel">
+        <div class="side-heading">
+          <h2 class="panel-title">Doküman Ayrıntıları</h2>
+          <mat-icon>more_horiz</mat-icon>
+        </div>
+
+        @if (selectedDocument(); as document) {
+          <div class="selected-file">
+            <span class="file-icon">{{ documentType(document) }}</span>
+            <strong>{{ document.fileName }}</strong>
+          </div>
+          <dl>
+            <dt>Kategori</dt>
+            <dd>{{ documentCategory(document) }}</dd>
+            <dt>Dosya Boyutu</dt>
+            <dd>{{ formatSize(document.sizeInBytes) }}</dd>
+            <dt>Yüklenme Tarihi</dt>
+            <dd>{{ document.createdAt | date:'dd.MM.yyyy HH:mm' }}</dd>
+            <dt>Yükleyen</dt>
+            <dd>{{ uploadedBy(document) }}</dd>
+            <dt>Durum</dt>
+            <dd>{{ statusLabel(document.status) }} · {{ statusHint(document.status) }}</dd>
+          </dl>
+        } @else {
+          <p class="muted">Ayrıntı için doküman seç.</p>
+        }
+      </section>
+
+      <section class="surface details-panel">
+        <h2 class="panel-title">İşlem Durumu</h2>
+        @if (selectedDocument(); as document) {
+          <dl>
+            <dt>OCR Durumu</dt>
+            <dd>{{ document.status === 'Processed' || document.status === 'Indexed' ? 'Tamamlandı' : 'Bekliyor' }}</dd>
+            <dt>Embedding</dt>
+            <dd>{{ document.status === 'Indexed' ? 'Hazır' : 'Bekliyor' }}</dd>
+            <dt>Son Güncelleme</dt>
+            <dd>{{ (document.updatedAt ?? document.createdAt) | date:'dd.MM.yyyy HH:mm' }}</dd>
+          </dl>
+        }
+      </section>
+
+      <section class="surface quick-actions">
+        <h2 class="panel-title">Hızlı İşlemler</h2>
+        @if (selectedDocument(); as document) {
+          <button type="button" [disabled]="!canProcess(document)" (click)="process(document)">
+            <mat-icon>sync</mat-icon>
+            Yeniden İşle
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button type="button" [disabled]="!canEmbed(document)" (click)="embed(document)">
+            <mat-icon>hub</mat-icon>
+            Embed Et
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button type="button" class="danger" (click)="delete(document)">
+            <mat-icon>delete</mat-icon>
+            Sil
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        }
+      </section>
+    </aside>
+  </div>
 </section>

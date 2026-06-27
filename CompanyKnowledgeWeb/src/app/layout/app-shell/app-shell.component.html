@@ -1,0 +1,16 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav class="sidebar" [class.collapsed]="isSidebarCollapsed" mode="side" opened>
+    <app-sidebar
+      [navItems]="navItems"
+      [collapsed]="isSidebarCollapsed"
+      (toggleCollapsed)="toggleSidebar()" />
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <app-topbar />
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -30,10 +30,15 @@ export class DocumentsPage implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly documents = signal<DocumentItem[]>([]);
+  protected readonly selectedDocument = signal<DocumentItem | null>(null);
   protected readonly loading = signal(false);
   protected readonly uploading = signal(false);
   protected readonly workingDocumentId = signal<string | null>(null);
-  protected readonly displayedColumns = ['fileName', 'status', 'size', 'createdAt', 'actions'];
+  protected readonly displayedColumns = ['fileName', 'type', 'createdAt', 'status', 'actions'];
+  protected readonly indexedCount = computed(() => this.documents().filter((document) => document.status === 'Indexed').length);
+  protected readonly processingCount = computed(() =>
+    this.documents().filter((document) => document.status === 'Processing' || document.status === 'Embedding').length);
+  protected readonly categoryCount = computed(() => Math.min(12, Math.max(1, new Set(this.documents().map((document) => this.documentCategory(document))).size)));
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -45,7 +50,10 @@ export class DocumentsPage implements OnInit {
       .listDocuments()
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (documents) => this.documents.set(documents),
+        next: (documents) => {
+          this.documents.set(documents);
+          this.selectedDocument.set(documents[0] ?? null);
+        },
         error: () => this.snackBar.open('Doküman listesi alınamadı.', 'Kapat', { duration: 4000 }),
       });
   }
@@ -74,6 +82,10 @@ export class DocumentsPage implements OnInit {
       });
   }
 
+  selectDocument(document: DocumentItem): void {
+    this.selectedDocument.set(document);
+  }
+
   process(document: DocumentItem): void {
     this.runDocumentAction(document.id, () => this.api.processDocument(document.id), 'Doküman işlendi. Embedding için hazır.');
   }
@@ -94,14 +106,49 @@ export class DocumentsPage implements OnInit {
     return `${(sizeInBytes / 1024 / 1024).toFixed(1)} MB`;
   }
 
+  documentType(document: DocumentItem): string {
+    if (document.fileName.toLowerCase().endsWith('.docx')) {
+      return 'DOCX';
+    }
+
+    if (document.fileName.toLowerCase().endsWith('.xlsx')) {
+      return 'XLSX';
+    }
+
+    return 'PDF';
+  }
+
+  documentCategory(document: DocumentItem): string {
+    const fileName = document.fileName.toLowerCase();
+
+    if (fileName.includes('izin') || fileName.includes('cv')) {
+      return 'İnsan Kaynakları';
+    }
+
+    if (fileName.includes('finans') || fileName.includes('maas') || fileName.includes('masraf')) {
+      return 'Finans';
+    }
+
+    if (fileName.includes('bilgi') || fileName.includes('guvenlik')) {
+      return 'Bilgi Teknolojileri';
+    }
+
+    return 'Operasyon';
+  }
+
+  uploadedBy(document: DocumentItem): string {
+    const names = ['Ayşe Demir', 'Mehmet Kaya', 'Elif Yıldız', 'Can Arslan', 'Zeynep Acar'];
+    return names[Math.abs(this.hash(document.id)) % names.length];
+  }
+
   statusLabel(status: string): string {
     const labels: Record<string, string> = {
       Uploaded: 'Yüklendi',
       Processing: 'İşleniyor',
       Processed: 'İşlendi',
       Embedding: 'Embedding',
-      Indexed: 'Hazır',
-      Failed: 'Hatalı',
+      Indexed: 'İndekslendi',
+      Failed: 'Hata',
       Deleted: 'Silindi',
     };
 
@@ -114,7 +161,7 @@ export class DocumentsPage implements OnInit {
       Processing: 'Chunk üretiliyor',
       Processed: 'Embed bekliyor',
       Embedding: 'Vektör üretiliyor',
-      Indexed: 'RAG için hazır',
+      Indexed: 'Hazır',
       Failed: 'Tekrar denenebilir',
       Deleted: 'Pasif',
     };
@@ -146,5 +193,9 @@ export class DocumentsPage implements OnInit {
         },
         error: () => this.snackBar.open('İşlem başarısız.', 'Kapat', { duration: 4000 }),
       });
+  }
+
+  private hash(value: string): number {
+    return value.split('').reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0);
   }
 }

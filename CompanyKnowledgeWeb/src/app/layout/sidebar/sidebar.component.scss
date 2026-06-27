@@ -1,0 +1,147 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidebar-content {
+  position: relative;
+  height: 100%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 96px;
+  padding: 0 22px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #155eef, #528bff);
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.brand-title {
+  color: #111827;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.brand-subtitle {
+  margin-top: 4px;
+  color: #155eef;
+  font-size: 14px;
+}
+
+.nav-list {
+  padding: 18px 14px;
+}
+
+.nav-list a {
+  height: 50px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  color: #475467;
+  font-weight: 700;
+}
+
+.nav-list a.active-link {
+  background: #eff5ff;
+  color: #155eef;
+  box-shadow: inset 4px 0 0 #155eef;
+}
+
+.tenant-card {
+  position: absolute;
+  right: 14px;
+  bottom: 76px;
+  left: 14px;
+  display: grid;
+  grid-template-columns: 46px 1fr 20px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.tenant-card strong {
+  display: block;
+  color: #111827;
+  font-size: 14px;
+}
+
+.tenant-card span {
+  display: block;
+  margin-top: 3px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.tenant-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: #edf4ff;
+  color: #155eef;
+}
+
+.collapse-button {
+  position: absolute;
+  right: 14px;
+  bottom: 20px;
+  left: 14px;
+  height: 44px;
+  justify-content: flex-start;
+  color: #475467;
+}
+
+.collapsed .brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.collapsed .brand-copy,
+.collapsed .nav-label,
+.collapsed .tenant-card,
+.collapsed .collapse-button span {
+  display: none;
+}
+
+.collapsed .nav-list a {
+  justify-content: center;
+  padding: 0;
+}
+
+.collapsed .nav-list mat-icon {
+  margin: 0;
+}
+
+.collapsed .collapse-button {
+  justify-content: center;
+}
+
+@media (max-width: 1100px) {
+  .brand {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .brand-copy,
+  .tenant-card,
+  .collapse-button span {
+    display: none;
+  }
+}

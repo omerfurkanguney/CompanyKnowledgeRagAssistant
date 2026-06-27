@@ -1,0 +1,198 @@
+<section class="sources-dashboard">
+  <section class="metrics-grid">
+    <article class="surface metric-card">
+      <span class="metric-icon"><mat-icon>database</mat-icon></span>
+      <div>
+        <div class="metric-label">Toplam Kaynak</div>
+        <div class="metric-value">{{ totalDocuments() }}</div>
+        <div class="metric-trend">↑ 12 bu ay</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon success"><mat-icon>link</mat-icon></span>
+      <div>
+        <div class="metric-label">Bağlı Kaynak</div>
+        <div class="metric-value">{{ activeSources() }}</div>
+        <div class="metric-trend">↑ 9 bu ay</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon warning"><mat-icon>sync</mat-icon></span>
+      <div>
+        <div class="metric-label">Güncelleniyor</div>
+        <div class="metric-value">{{ syncingSources() }}</div>
+        <div class="metric-trend warning-text">↓ 3 bu ay</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon purple"><mat-icon>folder</mat-icon></span>
+      <div>
+        <div class="metric-label">Kaynak Türü</div>
+        <div class="metric-value">{{ sourceTypeCount() }}</div>
+        <div class="metric-trend">↑ 2 bu ay</div>
+      </div>
+    </article>
+  </section>
+
+  <div class="sources-layout">
+    <main class="main-column">
+      <section class="surface filter-bar">
+        <div class="search-control">
+          <mat-icon>search</mat-icon>
+          <input type="search" placeholder="Kaynak adı, klasör veya etiket ara..." />
+        </div>
+        <button mat-stroked-button type="button">Kaynak Türü <mat-icon>expand_more</mat-icon></button>
+        <button mat-stroked-button type="button">Durum <mat-icon>expand_more</mat-icon></button>
+        <button mat-stroked-button type="button">Departman <mat-icon>expand_more</mat-icon></button>
+        <button mat-stroked-button type="button">Son Senkronizasyon <mat-icon>expand_more</mat-icon></button>
+        <span class="filter-spacer"></span>
+        <button mat-stroked-button type="button"><mat-icon>download</mat-icon>Dışa Aktar</button>
+        <button mat-flat-button class="new-source-button" type="button">
+          <mat-icon>add_circle</mat-icon>
+          Yeni Kaynak
+        </button>
+      </section>
+
+      <section class="surface table-panel">
+        <div class="table-title">Kaynak Listesi</div>
+
+        <table mat-table [dataSource]="sources()">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Kaynak Adı</th>
+            <td mat-cell *matCellDef="let source" (click)="selectSource(source)">
+              <div class="source-cell">
+                <span class="source-icon"><mat-icon>{{ sourceIcon(source.type) }}</mat-icon></span>
+                <strong>{{ source.name }}</strong>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Tür</th>
+            <td mat-cell *matCellDef="let source">{{ source.type }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef>Departman</th>
+            <td mat-cell *matCellDef="let source">{{ source.department }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="lastSync">
+            <th mat-header-cell *matHeaderCellDef>Son Senkronizasyon</th>
+            <td mat-cell *matCellDef="let source">{{ source.lastSync | date:'dd.MM.yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="documentCount">
+            <th mat-header-cell *matHeaderCellDef>Belge Sayısı</th>
+            <td mat-cell *matCellDef="let source">{{ source.documentCount }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Durum</th>
+            <td mat-cell *matCellDef="let source">
+              <mat-chip [class]="statusClass(source.status)">{{ source.status }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>İşlemler</th>
+            <td mat-cell *matCellDef="let source">
+              <button mat-icon-button type="button" (click)="selectSource(source)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected-row]="selectedSource().name === row.name"></tr>
+        </table>
+
+        <div class="table-footer">
+          <span>Toplam {{ totalDocuments() }} kaynaktan 1-7 arası gösteriliyor</span>
+          <div class="pagination">
+            <button type="button">Önceki</button>
+            <button type="button" class="active">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">4</button>
+            <span>...</span>
+            <button type="button">178</button>
+            <button type="button">Sonraki</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="surface source-types-panel">
+        <h2 class="panel-title">Kaynak Türleri</h2>
+        <div class="type-bars">
+          <div><span>SharePoint</span><mat-progress-bar mode="determinate" value="75" /></div>
+          <div><span>Google Drive</span><mat-progress-bar mode="determinate" value="65" /></div>
+          <div><span>Confluence</span><mat-progress-bar mode="determinate" value="52" /></div>
+          <div><span>OneDrive</span><mat-progress-bar mode="determinate" value="42" /></div>
+          <div><span>S3 Bucket</span><mat-progress-bar mode="determinate" value="34" /></div>
+          <div><span>Diğer</span><mat-progress-bar mode="determinate" value="38" /></div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="details-column">
+      <section class="surface details-panel">
+        <div class="side-heading">
+          <h2 class="panel-title">Kaynak Ayrıntıları</h2>
+          <mat-icon>more_horiz</mat-icon>
+        </div>
+
+        <div class="selected-source">
+          <span class="source-icon large"><mat-icon>{{ sourceIcon(selectedSource().type) }}</mat-icon></span>
+          <strong>{{ selectedSource().name }}</strong>
+        </div>
+
+        <dl>
+          <dt>Tür</dt>
+          <dd>{{ selectedSource().type }}</dd>
+          <dt>Departman</dt>
+          <dd>{{ selectedSource().department }}</dd>
+          <dt>Bağlantı Durumu</dt>
+          <dd><span class="connection-dot"></span>Bağlı</dd>
+          <dt>Belge Sayısı</dt>
+          <dd>{{ selectedSource().documentCount }}</dd>
+          <dt>Son Senkronizasyon</dt>
+          <dd>{{ selectedSource().lastSync | date:'dd.MM.yyyy HH:mm' }}</dd>
+          <dt>Sahip</dt>
+          <dd>{{ selectedSource().owner }}</dd>
+          <dt>Açıklama</dt>
+          <dd>{{ selectedSource().description }}</dd>
+        </dl>
+      </section>
+
+      <section class="surface details-panel">
+        <h2 class="panel-title">Senkronizasyon Durumu</h2>
+        <dl>
+          <dt>Son İşlem</dt>
+          <dd>Başarılı</dd>
+          <dt>Yeni Belge</dt>
+          <dd>6</dd>
+          <dt>Güncellenen</dt>
+          <dd>12</dd>
+          <dt>Hata Sayısı</dt>
+          <dd>0</dd>
+          <dt>Ortalama Süre</dt>
+          <dd>1.8 dk</dd>
+        </dl>
+      </section>
+
+      <section class="surface quick-actions">
+        <h2 class="panel-title">Hızlı İşlemler</h2>
+        <button type="button"><mat-icon>open_in_new</mat-icon>Kaynağı Aç<mat-icon>chevron_right</mat-icon></button>
+        <button type="button"><mat-icon>sync</mat-icon>Yeniden Senkronize Et<mat-icon>chevron_right</mat-icon></button>
+        <button type="button"><mat-icon>settings</mat-icon>Eşleme Ayarları<mat-icon>chevron_right</mat-icon></button>
+        <button type="button"><mat-icon>sell</mat-icon>Etiket Düzenle<mat-icon>chevron_right</mat-icon></button>
+        <button type="button"><mat-icon>pause_circle</mat-icon>Devre Dışı Bırak<mat-icon>chevron_right</mat-icon></button>
+        <button type="button" class="danger"><mat-icon>delete</mat-icon>Sil<mat-icon>chevron_right</mat-icon></button>
+      </section>
+    </aside>
+  </div>
+</section>

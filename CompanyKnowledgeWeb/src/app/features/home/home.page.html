@@ -1,0 +1,151 @@
+<section class="home-dashboard">
+  <section class="metrics-row">
+    <article class="surface metric-card">
+      <span class="metric-icon"><mat-icon>description</mat-icon></span>
+      <div>
+        <div class="metric-label">Toplam Doküman</div>
+        <div class="metric-value">1.248</div>
+        <div class="metric-trend">↑ 12 bu ay</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon purple"><mat-icon>groups</mat-icon></span>
+      <div>
+        <div class="metric-label">Aktif Kullanıcı</div>
+        <div class="metric-value">142</div>
+        <div class="metric-trend">↑ 8 bu hafta</div>
+      </div>
+    </article>
+
+    <article class="surface metric-card">
+      <span class="metric-icon success"><mat-icon>chat_bubble</mat-icon></span>
+      <div>
+        <div class="metric-label">Bugünkü Sorgu</div>
+        <div class="metric-value">356</div>
+        <div class="metric-trend">↑ 15% dünkü güne göre</div>
+      </div>
+    </article>
+  </section>
+
+  <div class="home-layout">
+    <aside class="left-column">
+      <section class="surface recent-panel">
+        <div class="panel-heading">
+          <h2 class="panel-title">Son Eklenen Dokümanlar</h2>
+          <a>Tümünü Gör</a>
+        </div>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Dosya Adı</th>
+              <th>Tür</th>
+              <th>Durum</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (document of recentDocuments; track document.name) {
+              <tr>
+                <td>{{ document.name }}</td>
+                <td>{{ document.type }}</td>
+                <td><span class="status-pill" [class.processing]="document.status === 'İşleniyor'">{{ document.status }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="surface category-panel">
+        <h2 class="panel-title">Doküman Kategorileri</h2>
+        <div class="category-content">
+          <div class="donut"></div>
+          <div class="category-list">
+            <span><i class="blue"></i> İnsan Kaynakları <strong>368</strong></span>
+            <span><i class="teal"></i> Finans <strong>276</strong></span>
+            <span><i class="green"></i> Bilgi Teknolojileri <strong>214</strong></span>
+            <span><i class="red"></i> Operasyon <strong>190</strong></span>
+            <span><i class="gray"></i> Diğer <strong>200</strong></span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <main class="surface preview-chat">
+      <div class="today-label">Bugün</div>
+      <div class="message user-message">
+        <p>Yıllık izin kaç gün önceden talep edilir?</p>
+        <span>10:24 ✓✓</span>
+      </div>
+      <div class="assistant-row">
+        <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>
+        <div class="message assistant-message">
+          <p>Yıllık izin talepleri, planlanan başlangıç tarihinden en az 10 iş günü öncesinden yöneticinize iletilmelidir.</p>
+          <p>Detaylı bilgi için yıllık izin politikası dokümanının 5. bölümünü inceleyebilirsiniz.</p>
+          <span>10:24</span>
+          <div class="message-actions">
+            <button mat-stroked-button type="button">
+              <mat-icon>picture_as_pdf</mat-icon>
+              01-yillik-izin-politikasi.pdf
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+            <button mat-stroked-button type="button">
+              <mat-icon>menu_book</mat-icon>
+              Bölüm 5
+              <mat-icon>open_in_new</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="feedback-row">
+        <span>Bu yanıtı beğendiniz mi?</span>
+        <button mat-icon-button type="button"><mat-icon>thumb_up</mat-icon></button>
+        <button mat-icon-button type="button"><mat-icon>thumb_down</mat-icon></button>
+      </div>
+      <div class="ask-box">
+        <span>Şirket politikaları hakkında soru sor...</span>
+        <mat-icon>attach_file</mat-icon>
+        <button mat-flat-button type="button"><mat-icon>send</mat-icon></button>
+      </div>
+    </main>
+
+    <aside class="right-column">
+      <section class="surface sources-panel">
+        <div class="panel-heading">
+          <h2 class="panel-title">Getirilen Kaynaklar</h2>
+          <mat-icon>info</mat-icon>
+        </div>
+        @for (source of sources; track source.name) {
+          <article class="source-card">
+            <span class="file-badge" [class.word]="source.name.endsWith('.docx')">{{ source.name.endsWith('.docx') ? 'W' : 'PDF' }}</span>
+            <div>
+              <strong>{{ source.name }}</strong>
+              <p>İlgili politika metninden getirilen kaynak özeti...</p>
+              <span>Bölüm {{ source.section }} · Sayfa {{ source.page }}</span>
+            </div>
+            <em>%{{ source.score }}</em>
+          </article>
+        }
+        <button type="button" class="view-all">Tüm kaynakları görüntüle <mat-icon>arrow_forward</mat-icon></button>
+      </section>
+
+      <section class="surface quality-panel">
+        <h2 class="panel-title">Yanıt Kalitesi</h2>
+        <div class="quality-grid">
+          <div><span>Güven Skoru</span><strong>%92</strong><em>Yüksek</em></div>
+          <div><span>Getirme Süresi</span><strong>1.42 sn</strong><em>İyi</em></div>
+          <div><span>Chunk Sayısı</span><strong>6</strong><em>Uygun</em></div>
+        </div>
+      </section>
+
+      <section class="surface suggestions-panel">
+        <div class="panel-heading">
+          <h2 class="panel-title">Önerilen Sorular</h2>
+          <mat-icon>refresh</mat-icon>
+        </div>
+        @for (question of suggestedQuestions; track question) {
+          <button type="button"><mat-icon>arrow_forward</mat-icon>{{ question }}</button>
+        }
+      </section>
+    </aside>
+  </div>
+</section>

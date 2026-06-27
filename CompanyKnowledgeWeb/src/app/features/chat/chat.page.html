@@ -1,98 +1,162 @@
-<section class="page">
-  <header class="page-header">
-    <h1 class="page-title">Chat</h1>
-    <p class="page-subtitle">Dokümanlardan kaynaklı cevap üretimi için soru sor.</p>
-  </header>
+<section class="chat-page">
+  <aside class="surface history-panel">
+    <div class="history-header">
+      <h1>Sohbet Geçmişi</h1>
+      <button mat-flat-button type="button">
+        <mat-icon>add</mat-icon>
+        Yeni Sohbet
+      </button>
+    </div>
 
-  <div class="chat-layout">
-    <section class="surface ask-panel">
-      <mat-form-field appearance="outline">
-        <mat-label>Soru</mat-label>
-        <textarea
-          matInput
-          rows="7"
-          [formControl]="question"
-          placeholder="CV'de hangi teknolojiler kullanılmış?"></textarea>
-        <mat-hint align="end">{{ question.value.length }}/2000</mat-hint>
-        @if (question.hasError('required') && question.touched) {
-          <mat-error>Soru zorunludur.</mat-error>
-        }
-      </mat-form-field>
+    <div class="history-tabs">
+      <button type="button" class="active">Bugün</button>
+      <button type="button">Bu Hafta</button>
+      <button type="button">Tümü</button>
+    </div>
 
-      <div class="topk-row">
-        <div>
-          <div class="control-label">Top K</div>
-          <div class="muted">Modele gönderilecek kaynak sayısı</div>
+    <div class="history-list">
+      @for (chat of chatHistory; track chat.title) {
+        <button type="button" [class.active]="chat.active">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <span>{{ chat.title }}</span>
+          <em>{{ chat.time }}</em>
+        </button>
+      }
+    </div>
+
+    <div class="history-count">Toplam {{ chatHistory.length }} sohbet</div>
+  </aside>
+
+  <main class="surface conversation-panel">
+    <header class="conversation-header">
+      <h2>Konu: Yıllık İzin Politikası</h2>
+      <mat-icon>info</mat-icon>
+    </header>
+
+    <div class="conversation-body">
+      <div class="message user-message">
+        <p>{{ lastQuestion() }}</p>
+        <span>{{ now | date:'HH:mm' }} ✓✓</span>
+      </div>
+
+      <div class="assistant-row">
+        <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>
+        <div class="message assistant-message">
+          @if (loading()) {
+            <div class="loading-line">
+              <mat-spinner diameter="22" />
+              <span>Cevap üretiliyor...</span>
+            </div>
+          } @else {
+            @for (line of answerLines(); track $index) {
+              <p>{{ line }}</p>
+            }
+            <div class="message-actions">
+              <button mat-stroked-button type="button">
+                <mat-icon>picture_as_pdf</mat-icon>
+                {{ response()?.sources?.[0]?.documentName ?? '01-yillik-izin-politikasi.pdf' }}
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <button mat-stroked-button type="button">
+                <mat-icon>menu_book</mat-icon>
+                Bölüm {{ response()?.sources?.[0]?.chunkIndex ?? 5 }}
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <button mat-stroked-button type="button">
+                <mat-icon>help_outline</mat-icon>
+                SSS
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            </div>
+          }
         </div>
-        <mat-slider min="1" max="10" step="1" discrete>
-          <input matSliderThumb [value]="topK()" (valueChange)="topK.set($event)" />
-        </mat-slider>
-        <span class="topk-value">{{ topK() }}</span>
       </div>
 
-      <div class="examples">
-        <button mat-stroked-button type="button" (click)="setExample('CV içinde hangi backend teknolojileri geçiyor?')">
-          Backend teknolojileri
-        </button>
-        <button mat-stroked-button type="button" (click)="setExample('Bu dokümanda PostgreSQL veya pgvector geçiyor mu?')">
-          PostgreSQL bilgisi
-        </button>
+      <div class="feedback-row">
+        <span>Bu yanıt faydalı mı?</span>
+        <button mat-icon-button type="button"><mat-icon>thumb_up</mat-icon></button>
+        <button mat-icon-button type="button"><mat-icon>thumb_down</mat-icon></button>
       </div>
+    </div>
 
-      <button mat-flat-button type="button" class="ask-button" (click)="ask()" [disabled]="loading()">
-        @if (loading()) {
-          <mat-spinner diameter="18" />
-        } @else {
+    <footer class="composer">
+      <textarea
+        [formControl]="question"
+        rows="3"
+        placeholder="Şirket politika ve süreçleri hakkında soru sor..."></textarea>
+      <div class="composer-footer">
+        <button mat-icon-button type="button"><mat-icon>attach_file</mat-icon></button>
+        <span>Enter ile gönder · Shift + Enter ile yeni satır</span>
+        <em>{{ question.value.length }} / 2000</em>
+        <button mat-flat-button type="button" class="send-button" (click)="ask()" [disabled]="loading()">
           <mat-icon>send</mat-icon>
-        }
-        Sor
+        </button>
+      </div>
+    </footer>
+  </main>
+
+  <aside class="right-column">
+    <section class="surface sources-panel">
+      <div class="panel-heading">
+        <h2 class="panel-title">Getirilen Kaynaklar</h2>
+        <mat-icon>info</mat-icon>
+      </div>
+
+      @for (source of (response()?.sources?.length ? response()!.sources : fallbackSources); track source.documentName) {
+        <article class="source-card">
+          <span class="file-badge" [class.word]="source.documentName.endsWith('.docx')">
+            {{ source.documentName.endsWith('.docx') ? 'W' : 'PDF' }}
+          </span>
+          <div>
+            <strong>{{ source.documentName }}</strong>
+            <p>{{ source.content }}</p>
+            <span>Bölüm {{ source.chunkIndex }} · Sayfa {{ source.pageNumber ?? '-' }}</span>
+          </div>
+          <em>%{{ source.score * 100 | number:'1.0-0' }}</em>
+        </article>
+      }
+
+      <button type="button" class="view-all">
+        Tüm kaynakları görüntüle
+        <mat-icon>arrow_forward</mat-icon>
       </button>
     </section>
 
-    <section class="surface answer-panel">
-      @if (loading()) {
-        <div class="empty-state">
-          <mat-spinner diameter="34" />
-          <span>Cevap üretiliyor</span>
+    <section class="surface summary-panel">
+      <div class="panel-heading">
+        <h2 class="panel-title">Yanıt Özeti</h2>
+        <mat-icon>info</mat-icon>
+      </div>
+      <div class="summary-grid">
+        <div>
+          <span>Güven Skoru</span>
+          <strong>%{{ confidence() }}</strong>
+          <em>Yüksek</em>
         </div>
-      } @else if (response()) {
-        <div class="answer">
-          <div class="section-title">Cevap</div>
-          <div class="answer-text">
-            @for (line of answerLines(); track $index) {
-              @if (line.trim()) {
-                <p>{{ line }}</p>
-              } @else {
-                <br>
-              }
-            }
-          </div>
+        <div>
+          <span>Getirme Süresi</span>
+          <strong>1.28 sn</strong>
+          <em>İyi</em>
         </div>
+        <div>
+          <span>Kullanılan Chunk</span>
+          <strong>{{ response()?.sources?.length ?? 4 }}</strong>
+          <em>Uygun</em>
+        </div>
+      </div>
+    </section>
 
-        <mat-divider />
-
-        <div class="sources">
-          <div class="section-title">Kaynaklar</div>
-          <mat-accordion>
-            @for (source of response()!.sources; track source.chunkId) {
-              <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>{{ source.documentName }}</mat-panel-title>
-                  <mat-panel-description>
-                    Sayfa {{ source.pageNumber ?? '-' }} · Chunk {{ source.chunkIndex }} · {{ source.score }}
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
-                <p class="source-content">{{ source.content }}</p>
-              </mat-expansion-panel>
-            }
-          </mat-accordion>
-        </div>
-      } @else {
-        <div class="empty-state">
-          <mat-icon>forum</mat-icon>
-          <span>Henüz soru sorulmadı.</span>
-        </div>
+    <section class="surface suggestions-panel">
+      <div class="panel-heading">
+        <h2 class="panel-title">Önerilen Sorular</h2>
+        <mat-icon>refresh</mat-icon>
+      </div>
+      @for (question of suggestedQuestions; track question) {
+        <button type="button" (click)="setExample(question)">
+          <mat-icon>arrow_forward</mat-icon>
+          {{ question }}
+        </button>
       }
     </section>
-  </div>
+  </aside>
 </section>

@@ -1,14 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { ApiService } from '../../core/api.service';
@@ -17,16 +13,13 @@ import { AskQuestionResponse } from '../../core/api.models';
 @Component({
   selector: 'app-chat-page',
   imports: [
+    DatePipe,
+    DecimalPipe,
     ReactiveFormsModule,
     MatButtonModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatExpansionModule,
-    MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSliderModule,
     MatSnackBarModule,
   ],
   templateUrl: './chat.page.html',
@@ -41,10 +34,62 @@ export class ChatPage {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(2000)],
   });
-  protected readonly topK = signal(2);
+  protected readonly topK = signal(4);
   protected readonly loading = signal(false);
   protected readonly response = signal<AskQuestionResponse | null>(null);
-  protected readonly answerLines = computed(() => this.response()?.answer.split('\n') ?? []);
+  protected readonly lastQuestion = signal('Yıllık izin kaç gün önceden talep edilmelidir?');
+  protected readonly now = new Date();
+  protected readonly answerLines = computed(() => this.response()?.answer.split('\n') ?? [
+    'Yıllık izin talepleri, planlanan başlangıç tarihinden en az 10 iş günü öncesinden yöneticinize iletilmelidir.',
+    'Beş iş gününden kısa izin taleplerinde ise en az 5 iş günü önce başvuru yapılması yeterlidir.',
+  ]);
+  protected readonly confidence = computed(() => {
+    const sources = this.response()?.sources ?? [];
+    if (sources.length === 0) {
+      return 94;
+    }
+
+    const average = sources.reduce((total, source) => total + source.score, 0) / sources.length;
+    return Math.round(average * 100);
+  });
+
+  protected readonly chatHistory = [
+    { title: 'Yıllık izin talebi nasıl yapılır?', time: '10:24', active: true },
+    { title: 'Masraf iadesi için hangi belgeler gerekli?', time: '09:48', active: false },
+    { title: 'Uzaktan çalışma gün sınırı nedir?', time: 'Dün', active: false },
+    { title: 'Onboarding süreci kaç gün sürer?', time: 'Dün', active: false },
+    { title: 'Bilgi güvenliği ihlali nasıl bildirilir?', time: '11 Haz', active: false },
+  ];
+
+  protected readonly fallbackSources = [
+    {
+      documentName: '01-yillik-izin-politikasi.pdf',
+      content: 'Yıllık izin talepleri en az 10 iş günü öncesinden yöneticinize iletilmelidir...',
+      pageNumber: 8,
+      chunkIndex: 5,
+      score: 0.94,
+    },
+    {
+      documentName: '08-calisan-el-kitabi-genel-kurallar.pdf',
+      content: 'İzin türleri ve başvuru süreçleri hakkında detaylı bilgiler yer almaktadır...',
+      pageNumber: 3,
+      chunkIndex: 2,
+      score: 0.72,
+    },
+    {
+      documentName: '02-uzaktan-calisma-politikasi.docx',
+      content: 'Uzaktan çalışma uygulamaları ve sık sorulan sorular bu bölümde...',
+      pageNumber: 12,
+      chunkIndex: 1,
+      score: 0.59,
+    },
+  ];
+
+  protected readonly suggestedQuestions = [
+    'Yıllık izin devredilir mi?',
+    'Yarım gün izin alınabilir mi?',
+    'İzin iptali nasıl yapılır?',
+  ];
 
   ask(): void {
     if (this.question.invalid || this.loading()) {
@@ -52,12 +97,14 @@ export class ChatPage {
       return;
     }
 
+    const question = this.question.value.trim();
     this.loading.set(true);
     this.response.set(null);
+    this.lastQuestion.set(question);
 
     this.api
       .askQuestion({
-        question: this.question.value,
+        question,
         topK: this.topK(),
       })
       .pipe(finalize(() => this.loading.set(false)))

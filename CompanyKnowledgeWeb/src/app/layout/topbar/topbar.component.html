@@ -1,0 +1,28 @@
+<mat-toolbar class="topbar">
+  <div class="topbar-search">
+    <mat-icon>search</mat-icon>
+    <input type="search" placeholder="Doküman, konu veya anahtar kelime ara..." />
+    <kbd>Ctrl + K</kbd>
+  </div>
+
+  <span class="topbar-spacer"></span>
+
+  <a mat-flat-button class="upload-button" routerLink="/documents">
+    <mat-icon>cloud_upload</mat-icon>
+    Doküman Yükle
+  </a>
+
+  <button mat-icon-button type="button" class="notification-button" aria-label="Bildirimler">
+    <mat-icon>notifications</mat-icon>
+    <span>3</span>
+  </button>
+
+  <div class="user-card">
+    <div class="avatar">AY</div>
+    <div>
+      <strong>Ahmet Yılmaz</strong>
+      <span>Sistem Yöneticisi</span>
+    </div>
+    <mat-icon>expand_more</mat-icon>
+  </div>
+</mat-toolbar>
