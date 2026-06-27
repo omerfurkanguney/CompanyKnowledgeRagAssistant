@@ -14,6 +14,14 @@ public sealed class Document
 
     public long SizeInBytes { get; set; }
 
+    public Guid? DepartmentId { get; set; }
+
+    public Department? Department { get; set; }
+
+    public Guid? CategoryId { get; set; }
+
+    public DocumentCategory? Category { get; set; }
+
     public DocumentStatus Status { get; set; } = DocumentStatus.Uploaded;
 
     public string? FailureReason { get; set; }

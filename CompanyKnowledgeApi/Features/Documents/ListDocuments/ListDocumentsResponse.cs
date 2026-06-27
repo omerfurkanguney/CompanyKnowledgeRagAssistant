@@ -5,6 +5,10 @@ public sealed record ListDocumentsResponse(
     string FileName,
     string ContentType,
     long SizeInBytes,
+    Guid? DepartmentId,
+    string? DepartmentName,
+    Guid? CategoryId,
+    string? CategoryName,
     string Status,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt);

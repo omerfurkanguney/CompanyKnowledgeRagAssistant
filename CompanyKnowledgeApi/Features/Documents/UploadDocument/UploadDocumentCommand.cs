@@ -3,6 +3,7 @@ using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Database.Entities;
 using CompanyKnowledgeApi.Infrastructure.Storage;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyKnowledgeApi.Features.Documents.UploadDocument;
 
@@ -22,6 +23,19 @@ public sealed class UploadDocumentCommand(
         }
 
         var file = model.File!;
+
+        if (model.DepartmentId.HasValue &&
+            !await dbContext.Departments.AnyAsync(department => department.Id == model.DepartmentId.Value, cancellationToken))
+        {
+            return Results.BadRequest("Selected department does not exist.");
+        }
+
+        if (model.CategoryId.HasValue &&
+            !await dbContext.DocumentCategories.AnyAsync(category => category.Id == model.CategoryId.Value, cancellationToken))
+        {
+            return Results.BadRequest("Selected document category does not exist.");
+        }
+
         var storedFile = await fileStorage.SaveAsync(file, cancellationToken);
 
         var document = new Document
@@ -32,6 +46,8 @@ public sealed class UploadDocumentCommand(
             StoragePath = storedFile.RelativePath,
             ContentType = storedFile.ContentType,
             SizeInBytes = storedFile.SizeInBytes,
+            DepartmentId = model.DepartmentId,
+            CategoryId = model.CategoryId,
             Status = DocumentStatus.Uploaded,
             CreatedAt = DateTimeOffset.UtcNow
         };

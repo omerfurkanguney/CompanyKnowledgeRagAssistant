@@ -19,6 +19,10 @@ public sealed class ListDocumentsQuery(AppDbContext dbContext)
                 document.FileName,
                 document.ContentType,
                 document.SizeInBytes,
+                document.DepartmentId,
+                document.Department == null ? null : document.Department.Name,
+                document.CategoryId,
+                document.Category == null ? null : document.Category.Name,
                 document.Status.ToString(),
                 document.CreatedAt,
                 document.UpdatedAt))

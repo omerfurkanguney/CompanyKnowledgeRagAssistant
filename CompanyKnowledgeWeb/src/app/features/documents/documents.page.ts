@@ -9,8 +9,9 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { Observable, finalize } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { DocumentItem } from '../../core/api.models';
+import { DepartmentLookup, DocumentCategoryLookup, DocumentItem } from '../../core/api.models';
 import {
+  UploadDocumentDialogData,
   UploadDocumentDialogComponent,
   UploadDocumentDialogResult,
 } from './upload-document-dialog/upload-document-dialog.component';
@@ -41,6 +42,8 @@ export class DocumentsPage implements OnInit {
   protected readonly loading = signal(false);
   protected readonly uploading = signal(false);
   protected readonly workingDocumentId = signal<string | null>(null);
+  protected readonly departments = signal<DepartmentLookup[]>([]);
+  protected readonly categories = signal<DocumentCategoryLookup[]>([]);
   protected readonly displayedColumns = ['fileName', 'type', 'createdAt', 'status', 'actions'];
   protected readonly indexedCount = computed(() => this.documents().filter((document) => document.status === 'Indexed').length);
   protected readonly processingCount = computed(() =>
@@ -48,7 +51,20 @@ export class DocumentsPage implements OnInit {
   protected readonly categoryCount = computed(() => Math.min(12, Math.max(1, new Set(this.documents().map((document) => this.documentCategory(document))).size)));
 
   ngOnInit(): void {
+    this.loadLookups();
     this.loadDocuments();
+  }
+
+  loadLookups(): void {
+    this.api.listDepartments().subscribe({
+      next: (departments) => this.departments.set(departments),
+      error: () => this.snackBar.open('Departman listesi alınamadı.', 'Kapat', { duration: 4000 }),
+    });
+
+    this.api.listDocumentCategories().subscribe({
+      next: (categories) => this.categories.set(categories),
+      error: () => this.snackBar.open('Doküman türleri alınamadı.', 'Kapat', { duration: 4000 }),
+    });
   }
 
   loadDocuments(): void {
@@ -67,9 +83,13 @@ export class DocumentsPage implements OnInit {
 
   openUploadDialog(): void {
     this.dialog
-      .open<UploadDocumentDialogComponent, void, UploadDocumentDialogResult>(UploadDocumentDialogComponent, {
+      .open<UploadDocumentDialogComponent, UploadDocumentDialogData, UploadDocumentDialogResult>(UploadDocumentDialogComponent, {
         width: '560px',
         autoFocus: false,
+        data: {
+          departments: this.departments(),
+          categories: this.categories(),
+        },
       })
       .afterClosed()
       .subscribe((result) => {
@@ -82,7 +102,7 @@ export class DocumentsPage implements OnInit {
   upload(result: UploadDocumentDialogResult): void {
     this.uploading.set(true);
     this.api
-      .uploadDocument(result.file)
+      .uploadDocument(result.file, result.departmentId, result.categoryId)
       .pipe(finalize(() => this.uploading.set(false)))
       .subscribe({
         next: () => {
@@ -132,6 +152,10 @@ export class DocumentsPage implements OnInit {
   documentCategory(document: DocumentItem): string {
     const fileName = document.fileName.toLowerCase();
 
+    if (document.categoryName) {
+      return document.categoryName;
+    }
+
     if (fileName.includes('izin') || fileName.includes('cv')) {
       return 'İnsan Kaynakları';
     }
@@ -145,6 +169,10 @@ export class DocumentsPage implements OnInit {
     }
 
     return 'Operasyon';
+  }
+
+  documentDepartment(document: DocumentItem): string {
+    return document.departmentName ?? 'Departmansız';
   }
 
   uploadedBy(document: DocumentItem): string {

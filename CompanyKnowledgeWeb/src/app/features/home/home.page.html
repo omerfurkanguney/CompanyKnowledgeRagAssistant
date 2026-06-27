@@ -4,7 +4,7 @@
       <span class="metric-icon"><mat-icon>description</mat-icon></span>
       <div>
         <div class="metric-label">Toplam Doküman</div>
-        <div class="metric-value">1.248</div>
+        <div class="metric-value">{{ summary()?.totalDocumentCount ?? 0 }}</div>
       </div>
     </article>
 
@@ -12,7 +12,7 @@
       <span class="metric-icon purple"><mat-icon>groups</mat-icon></span>
       <div>
         <div class="metric-label">Toplam Kullanıcı</div>
-        <div class="metric-value">1</div>
+        <div class="metric-value">{{ summary()?.totalUserCount ?? 0 }}</div>
       </div>
     </article>
 
@@ -20,7 +20,7 @@
       <span class="metric-icon success"><mat-icon>chat_bubble</mat-icon></span>
       <div>
         <div class="metric-label">Bugünkü Sorgu</div>
-        <div class="metric-value">0</div>
+        <div class="metric-value">{{ summary()?.todayQuestionCount ?? 0 }}</div>
       </div>
     </article>
   </section>
@@ -41,11 +41,11 @@
             </tr>
           </thead>
           <tbody>
-            @for (document of recentDocuments; track document.name) {
+            @for (document of recentDocuments(); track document.id) {
               <tr>
-                <td>{{ document.name }}</td>
-                <td>{{ document.type }}</td>
-                <td><span class="status-pill" [class.processing]="document.status === 'İşleniyor'">{{ document.status }}</span></td>
+                <td>{{ document.fileName }}</td>
+                <td>{{ documentType(document) }}</td>
+                <td><span class="status-pill" [class.processing]="document.status === 'Processing' || document.status === 'Embedding'">{{ statusLabel(document.status) }}</span></td>
               </tr>
             }
           </tbody>
@@ -53,15 +53,16 @@
       </section>
 
       <section class="surface category-panel">
-        <h2 class="panel-title">Doküman Kategorileri</h2>
+        <h2 class="panel-title">Doküman Dağılımı</h2>
         <div class="category-content">
           <div class="donut"></div>
           <div class="category-list">
-            <span><i class="blue"></i> İnsan Kaynakları <strong>368</strong></span>
-            <span><i class="teal"></i> Finans <strong>276</strong></span>
-            <span><i class="green"></i> Bilgi Teknolojileri <strong>214</strong></span>
-            <span><i class="red"></i> Operasyon <strong>190</strong></span>
-            <span><i class="gray"></i> Diğer <strong>200</strong></span>
+            @for (item of departmentCounts(); track item.departmentName) {
+              <span><i class="blue"></i> {{ item.departmentName }} <strong>{{ item.documentCount }}</strong></span>
+            }
+            @if (departmentCounts().length === 0) {
+              <span><i class="gray"></i> Departman yok <strong>0</strong></span>
+            }
           </div>
         </div>
       </section>

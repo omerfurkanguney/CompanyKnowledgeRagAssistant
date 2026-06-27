@@ -6,8 +6,11 @@ import {
   ApiInfo,
   AskQuestionRequest,
   AskQuestionResponse,
+  DepartmentLookup,
+  DocumentCategoryLookup,
   DocumentItem,
   EmbedDocumentResponse,
+  HomeSummary,
   ProcessDocumentResponse,
   SystemHealth,
   UploadDocumentResponse,
@@ -27,9 +30,28 @@ export class ApiService {
     return this.http.get<DocumentItem[]>(`${this.apiUrl}/documents`);
   }
 
-  uploadDocument(file: File): Observable<UploadDocumentResponse> {
+  getHomeSummary(): Observable<HomeSummary> {
+    return this.http.get<HomeSummary>(`${this.apiUrl}/home/summary`);
+  }
+
+  listDepartments(): Observable<DepartmentLookup[]> {
+    return this.http.get<DepartmentLookup[]>(`${this.apiUrl}/lookups/departments`);
+  }
+
+  listDocumentCategories(): Observable<DocumentCategoryLookup[]> {
+    return this.http.get<DocumentCategoryLookup[]>(`${this.apiUrl}/lookups/document-categories`);
+  }
+
+  uploadDocument(file: File, departmentId?: string | null, categoryId?: string | null): Observable<UploadDocumentResponse> {
     const formData = new FormData();
     formData.append('file', file);
+    if (departmentId) {
+      formData.append('departmentId', departmentId);
+    }
+
+    if (categoryId) {
+      formData.append('categoryId', categoryId);
+    }
 
     return this.http.post<UploadDocumentResponse>(`${this.apiUrl}/documents`, formData);
   }

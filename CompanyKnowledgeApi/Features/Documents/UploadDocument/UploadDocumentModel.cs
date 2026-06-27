@@ -1,3 +1,6 @@
 namespace CompanyKnowledgeApi.Features.Documents.UploadDocument;
 
-public sealed record UploadDocumentModel(IFormFile? File);
+public sealed record UploadDocumentModel(
+    IFormFile? File,
+    Guid? DepartmentId,
+    Guid? CategoryId);
