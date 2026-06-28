@@ -57,6 +57,42 @@
   font: inherit;
 }
 
+.filter-select {
+  width: 158px;
+  height: 42px;
+}
+
+.filter-select ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 42px;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.filter-select ::ng-deep .mat-mdc-form-field-flex {
+  height: 42px;
+  align-items: center;
+}
+
+.filter-select ::ng-deep .mat-mdc-form-field-infix {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.filter-select ::ng-deep .mat-mdc-select-value,
+.filter-select ::ng-deep .mat-mdc-floating-label {
+  color: #344054;
+  font-size: 14px;
+}
+
+.filter-select ::ng-deep .mdc-notched-outline__leading,
+.filter-select ::ng-deep .mdc-notched-outline__notch,
+.filter-select ::ng-deep .mdc-notched-outline__trailing {
+  border-color: #dbe3ef;
+}
+
 .filter-spacer {
   flex: 1;
 }

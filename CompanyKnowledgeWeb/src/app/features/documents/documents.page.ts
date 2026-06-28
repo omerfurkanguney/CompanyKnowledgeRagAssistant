@@ -3,8 +3,10 @@ import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { Observable, finalize } from 'rxjs';
@@ -23,8 +25,10 @@ import {
     MatButtonModule,
     MatChipsModule,
     MatDialogModule,
+    MatFormFieldModule,
     MatIconModule,
     MatProgressBarModule,
+    MatSelectModule,
     MatSnackBarModule,
     MatTableModule,
   ],
@@ -44,11 +48,46 @@ export class DocumentsPage implements OnInit {
   protected readonly workingDocumentId = signal<string | null>(null);
   protected readonly departments = signal<DepartmentLookup[]>([]);
   protected readonly categories = signal<DocumentCategoryLookup[]>([]);
+  protected readonly searchTerm = signal('');
+  protected readonly selectedCategory = signal('');
+  protected readonly selectedFileType = signal('');
+  protected readonly selectedStatus = signal('');
   protected readonly displayedColumns = ['fileName', 'type', 'createdAt', 'status', 'actions'];
   protected readonly indexedCount = computed(() => this.documents().filter((document) => document.status === 'Indexed').length);
   protected readonly processingCount = computed(() =>
     this.documents().filter((document) => document.status === 'Processing' || document.status === 'Embedding').length);
   protected readonly categoryCount = computed(() => Math.min(12, Math.max(1, new Set(this.documents().map((document) => this.documentCategory(document))).size)));
+  protected readonly fileTypeOptions = computed(() =>
+    Array.from(new Set(this.documents().map((document) => this.documentType(document)))).sort());
+  protected readonly statusOptions = computed(() =>
+    Array.from(new Set(this.documents().map((document) => document.status))).sort());
+  protected readonly categoryOptions = computed(() => {
+    const lookupOptions = this.categories().map((category) => category.name);
+    const documentOptions = this.documents().map((document) => this.documentCategory(document));
+
+    return Array.from(new Set([...lookupOptions, ...documentOptions])).sort();
+  });
+  protected readonly filteredDocuments = computed(() => {
+    const searchTerm = this.searchTerm().trim().toLowerCase();
+    const selectedCategory = this.selectedCategory();
+    const selectedFileType = this.selectedFileType();
+    const selectedStatus = this.selectedStatus();
+
+    return this.documents().filter((document) => {
+      const category = this.documentCategory(document);
+      const department = this.documentDepartment(document);
+      const fileType = this.documentType(document);
+      const matchesSearch = !searchTerm
+        || document.fileName.toLowerCase().includes(searchTerm)
+        || category.toLowerCase().includes(searchTerm)
+        || department.toLowerCase().includes(searchTerm);
+      const matchesCategory = !selectedCategory || category === selectedCategory;
+      const matchesFileType = !selectedFileType || fileType === selectedFileType;
+      const matchesStatus = !selectedStatus || document.status === selectedStatus;
+
+      return matchesSearch && matchesCategory && matchesFileType && matchesStatus;
+    });
+  });
 
   ngOnInit(): void {
     this.loadLookups();
@@ -106,7 +145,7 @@ export class DocumentsPage implements OnInit {
       .pipe(finalize(() => this.uploading.set(false)))
       .subscribe({
         next: () => {
-          this.snackBar.open('Doküman yüklendi. Process işlemi bekliyor.', 'Kapat', { duration: 3000 });
+          this.snackBar.open('Doküman yüklendi. Metin işleme bekliyor.', 'Kapat', { duration: 3000 });
           this.loadDocuments();
         },
         error: () => this.snackBar.open('Upload başarısız.', 'Kapat', { duration: 4000 }),
@@ -175,11 +214,6 @@ export class DocumentsPage implements OnInit {
     return document.departmentName ?? 'Departmansız';
   }
 
-  uploadedBy(document: DocumentItem): string {
-    const names = ['Ayşe Demir', 'Mehmet Kaya', 'Elif Yıldız', 'Can Arslan', 'Zeynep Acar'];
-    return names[Math.abs(this.hash(document.id)) % names.length];
-  }
-
   statusLabel(status: string): string {
     const labels: Record<string, string> = {
       Uploaded: 'Yüklendi',
@@ -196,7 +230,7 @@ export class DocumentsPage implements OnInit {
 
   statusHint(status: string): string {
     const hints: Record<string, string> = {
-      Uploaded: 'Process bekliyor',
+      Uploaded: 'Metin işleme bekliyor',
       Processing: 'Chunk üretiliyor',
       Processed: 'Embed bekliyor',
       Embedding: 'Vektör üretiliyor',
@@ -232,9 +266,5 @@ export class DocumentsPage implements OnInit {
         },
         error: () => this.snackBar.open('İşlem başarısız.', 'Kapat', { duration: 4000 }),
       });
-  }
-
-  private hash(value: string): number {
-    return value.split('').reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0);
   }
 }

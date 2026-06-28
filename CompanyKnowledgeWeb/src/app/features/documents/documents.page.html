@@ -42,11 +42,35 @@
       <section class="surface filter-bar">
         <div class="search-control">
           <mat-icon>search</mat-icon>
-          <input type="search" placeholder="Dosya adı, etiket veya içerik ara..." />
+          <input type="search" placeholder="Dosya adı, kategori veya departman ara..." (input)="searchTerm.set($any($event.target).value)" />
         </div>
-        <button mat-stroked-button type="button">Kategori <mat-icon>expand_more</mat-icon></button>
-        <button mat-stroked-button type="button">Dosya Türü <mat-icon>expand_more</mat-icon></button>
-        <button mat-stroked-button type="button">Durum <mat-icon>expand_more</mat-icon></button>
+        <mat-form-field class="filter-select" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Kategori</mat-label>
+          <mat-select [value]="selectedCategory()" (selectionChange)="selectedCategory.set($event.value)">
+            <mat-option value="">Tümü</mat-option>
+            @for (category of categoryOptions(); track category) {
+              <mat-option [value]="category">{{ category }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="filter-select" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Dosya Türü</mat-label>
+          <mat-select [value]="selectedFileType()" (selectionChange)="selectedFileType.set($event.value)">
+            <mat-option value="">Tümü</mat-option>
+            @for (fileType of fileTypeOptions(); track fileType) {
+              <mat-option [value]="fileType">{{ fileType }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="filter-select" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Durum</mat-label>
+          <mat-select [value]="selectedStatus()" (selectionChange)="selectedStatus.set($event.value)">
+            <mat-option value="">Tümü</mat-option>
+            @for (status of statusOptions(); track status) {
+              <mat-option [value]="status">{{ statusLabel(status) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
         <span class="filter-spacer"></span>
         <button mat-stroked-button type="button"><mat-icon>download</mat-icon>Dışa Aktar</button>
         <button mat-flat-button class="new-document-button" type="button" (click)="openUploadDialog()" [disabled]="uploading()">
@@ -62,7 +86,7 @@
 
         <div class="table-title">Doküman Listesi</div>
 
-        <table mat-table [dataSource]="documents()">
+        <table mat-table [dataSource]="filteredDocuments()">
           <ng-container matColumnDef="fileName">
             <th mat-header-cell *matHeaderCellDef>Dosya Adı</th>
             <td mat-cell *matCellDef="let document" (click)="selectDocument(document)">
@@ -97,14 +121,14 @@
             <th mat-header-cell *matHeaderCellDef>İşlemler</th>
             <td mat-cell *matCellDef="let document">
               <div class="row-actions">
-                <button mat-icon-button type="button" title="Process" (click)="process(document)" [disabled]="workingDocumentId() === document.id || !canProcess(document)">
+                <button mat-icon-button type="button" title="Metni İşle" (click)="process(document)" [disabled]="workingDocumentId() === document.id || !canProcess(document)">
                   <mat-icon>data_object</mat-icon>
                 </button>
                 <button mat-icon-button type="button" title="Embed" (click)="embed(document)" [disabled]="workingDocumentId() === document.id || !canEmbed(document)">
                   <mat-icon>hub</mat-icon>
                 </button>
                 <button mat-icon-button type="button" title="Sil" (click)="delete(document)" [disabled]="workingDocumentId() === document.id">
-                  <mat-icon>more_vert</mat-icon>
+                  <mat-icon>delete</mat-icon>
                 </button>
               </div>
             </td>
@@ -114,10 +138,10 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected-row]="selectedDocument()?.id === row.id"></tr>
         </table>
 
-        @if (!loading() && documents().length === 0) {
+        @if (!loading() && filteredDocuments().length === 0) {
           <div class="empty-documents">
             <mat-icon>folder_off</mat-icon>
-            <span>Henüz doküman yok.</span>
+            <span>Filtreye uygun doküman yok.</span>
           </div>
         }
       </section>
@@ -144,8 +168,6 @@
             <dd>{{ formatSize(document.sizeInBytes) }}</dd>
             <dt>Yüklenme Tarihi</dt>
             <dd>{{ document.createdAt | date:'dd.MM.yyyy HH:mm' }}</dd>
-            <dt>Yükleyen</dt>
-            <dd>{{ uploadedBy(document) }}</dd>
             <dt>Durum</dt>
             <dd>{{ statusLabel(document.status) }} · {{ statusHint(document.status) }}</dd>
           </dl>
@@ -158,7 +180,7 @@
         <h2 class="panel-title">İşlem Durumu</h2>
         @if (selectedDocument(); as document) {
           <dl>
-            <dt>OCR Durumu</dt>
+            <dt>Metin İşleme</dt>
             <dd>{{ document.status === 'Processed' || document.status === 'Indexed' ? 'Tamamlandı' : 'Bekliyor' }}</dd>
             <dt>Embedding</dt>
             <dd>{{ document.status === 'Indexed' ? 'Hazır' : 'Bekliyor' }}</dd>
@@ -173,7 +195,7 @@
         @if (selectedDocument(); as document) {
           <button type="button" [disabled]="!canProcess(document)" (click)="process(document)">
             <mat-icon>sync</mat-icon>
-            Yeniden İşle
+            Metni İşle
             <mat-icon>chevron_right</mat-icon>
           </button>
           <button type="button" [disabled]="!canEmbed(document)" (click)="embed(document)">
