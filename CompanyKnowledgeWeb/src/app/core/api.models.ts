@@ -15,7 +15,11 @@ export interface AskQuestionSource {
   documentName: string;
   chunkId: string;
   content: string;
-  pageNumber: number | null;
+  startPageNumber: number | null;
+  endPageNumber: number | null;
+  heading: string | null;
+  clauseId: string | null;
+  chunkType: string | null;
   chunkIndex: number;
   score: number;
 }
@@ -25,6 +29,7 @@ export interface DocumentItem {
   fileName: string;
   contentType: string;
   sizeInBytes: number;
+  pageCount: number | null;
   departmentId: string | null;
   departmentName: string | null;
   categoryId: string | null;

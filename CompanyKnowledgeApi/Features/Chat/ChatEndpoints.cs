@@ -1,4 +1,5 @@
 using CompanyKnowledgeApi.Features.Chat.AskQuestion;
+using CompanyKnowledgeApi.Features.Chat.DeleteChatSession;
 using CompanyKnowledgeApi.Features.Chat.GetChatSession;
 using CompanyKnowledgeApi.Features.Chat.ListChatSessions;
 
@@ -14,6 +15,7 @@ public static class ChatEndpoints
         group.MapAskQuestionEndpoint();
         group.MapListChatSessionsEndpoint();
         group.MapGetChatSessionEndpoint();
+        group.MapDeleteChatSessionEndpoint();
 
         return app;
     }

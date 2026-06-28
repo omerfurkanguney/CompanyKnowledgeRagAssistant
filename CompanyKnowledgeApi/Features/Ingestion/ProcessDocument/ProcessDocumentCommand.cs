@@ -54,6 +54,11 @@ public sealed class ProcessDocumentCommand(
 
             var pages = await extractor.ExtractAsync(fullPath, cancellationToken);
             var chunks = textChunker.Chunk(pages);
+            var pageNumbers = pages
+                .Select(page => page.PageNumber)
+                .Where(pageNumber => pageNumber.HasValue)
+                .Select(pageNumber => pageNumber!.Value)
+                .ToList();
 
             dbContext.DocumentChunks.RemoveRange(document.Chunks);
 
@@ -64,7 +69,11 @@ public sealed class ProcessDocumentCommand(
                     Id = Guid.NewGuid(),
                     DocumentId = document.Id,
                     Content = chunk.Content,
-                    PageNumber = chunk.PageNumber,
+                    StartPageNumber = chunk.StartPageNumber,
+                    EndPageNumber = chunk.EndPageNumber,
+                    Heading = chunk.Heading,
+                    ClauseId = chunk.ClauseId,
+                    ChunkType = chunk.ChunkType,
                     ChunkIndex = chunk.ChunkIndex,
                     TokenCount = chunk.EstimatedTokenCount,
                     Embedding = null,
@@ -73,6 +82,7 @@ public sealed class ProcessDocumentCommand(
             }
 
             document.Status = chunks.Count > 0 ? DocumentStatus.Processed : DocumentStatus.Failed;
+            document.PageCount = pageNumbers.Count > 0 ? pageNumbers.Max() : null;
             document.FailureReason = chunks.Count > 0 ? null : "No extractable text was found in the document.";
             document.UpdatedAt = DateTimeOffset.UtcNow;
 

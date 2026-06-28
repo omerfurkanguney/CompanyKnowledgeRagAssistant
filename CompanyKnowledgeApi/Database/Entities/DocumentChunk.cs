@@ -12,7 +12,15 @@ public sealed class DocumentChunk
 
     public string Content { get; set; } = string.Empty;
 
-    public int? PageNumber { get; set; }
+    public int? StartPageNumber { get; set; }
+
+    public int? EndPageNumber { get; set; }
+
+    public string? Heading { get; set; }
+
+    public string? ClauseId { get; set; }
+
+    public string ChunkType { get; set; } = "Fixed";
 
     public int ChunkIndex { get; set; }
 

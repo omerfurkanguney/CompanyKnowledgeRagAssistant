@@ -16,11 +16,16 @@
 
     <div class="history-list">
       @for (chat of chatSessions(); track chat.id) {
-        <button type="button" [class.active]="currentSessionId() === chat.id" (click)="selectSession(chat)">
-          <mat-icon>chat_bubble_outline</mat-icon>
-          <span>{{ chat.title }}</span>
-          <em>{{ formatSessionTime(chat.updatedAt) }}</em>
-        </button>
+        <div class="history-item" [class.active]="currentSessionId() === chat.id">
+          <button type="button" class="history-select" (click)="selectSession(chat)">
+            <mat-icon>chat_bubble_outline</mat-icon>
+            <span>{{ chat.title }}</span>
+            <em>{{ formatSessionTime(chat.updatedAt) }}</em>
+          </button>
+          <button mat-icon-button type="button" class="history-delete" title="Sohbeti sil" (click)="deleteSession($event, chat)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       }
       @if (!loadingSessions() && chatSessions().length === 0) {
         <div class="empty-history">Henüz sohbet yok.</div>
@@ -66,7 +71,7 @@
                   </button>
                   <button mat-stroked-button type="button">
                     <mat-icon>menu_book</mat-icon>
-                    Bölüm {{ message.sources[0].chunkIndex }}
+                    {{ sourceLocation(message.sources[0]) }}
                     <mat-icon>open_in_new</mat-icon>
                   </button>
                 </div>

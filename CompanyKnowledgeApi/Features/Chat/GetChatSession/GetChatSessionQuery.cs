@@ -14,7 +14,7 @@ public sealed class GetChatSessionQuery(AppDbContext dbContext)
         var session = await dbContext.ChatSessions
             .AsNoTracking()
             .Include(session => session.Messages.OrderBy(message => message.CreatedAt))
-            .FirstOrDefaultAsync(session => session.Id == sessionId, cancellationToken);
+            .FirstOrDefaultAsync(session => session.Id == sessionId && !session.IsDeleted, cancellationToken);
 
         if (session is null)
         {

@@ -168,6 +168,8 @@
             <dd>{{ documentDepartment(document) }}</dd>
             <dt>Dosya Boyutu</dt>
             <dd>{{ formatSize(document.sizeInBytes) }}</dd>
+            <dt>Sayfa Sayısı</dt>
+            <dd>{{ document.pageCount ?? 'Yok' }}</dd>
             <dt>Yüklenme Tarihi</dt>
             <dd>{{ document.createdAt | date:'dd.MM.yyyy HH:mm' }}</dd>
             <dt>Durum</dt>

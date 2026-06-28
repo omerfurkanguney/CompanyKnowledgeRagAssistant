@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { AskQuestionResponse, ChatMessage, ChatSessionSummary } from '../../core/api.models';
+import { AskQuestionResponse, AskQuestionSource, ChatMessage, ChatSessionSummary } from '../../core/api.models';
 
 interface SuggestedQuestionTopic {
   key: string;
@@ -202,6 +202,21 @@ export class ChatPage implements OnInit {
     });
   }
 
+  deleteSession(event: MouseEvent, session: ChatSessionSummary): void {
+    event.stopPropagation();
+    this.api.deleteChatSession(session.id).subscribe({
+      next: () => {
+        if (this.currentSessionId() === session.id) {
+          this.newChat();
+        }
+
+        this.chatSessions.set(this.chatSessions().filter((item) => item.id !== session.id));
+        this.snackBar.open('Sohbet silindi.', 'Kapat', { duration: 3000 });
+      },
+      error: () => this.snackBar.open('Sohbet silinemedi.', 'Kapat', { duration: 4000 }),
+    });
+  }
+
   ask(): void {
     if (this.question.invalid || this.loading()) {
       this.question.markAsTouched();
@@ -268,6 +283,31 @@ export class ChatPage implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  sourceLocation(source: AskQuestionSource): string {
+    const parts: string[] = [];
+
+    if (source.clauseId) {
+      parts.push(`Madde ${source.clauseId}`);
+    }
+
+    const pageRange = this.sourcePageRange(source);
+    if (pageRange) {
+      parts.push(`Sayfa ${pageRange}`);
+    }
+
+    return parts.length > 0 ? parts.join(' · ') : `Chunk ${source.chunkIndex}`;
+  }
+
+  private sourcePageRange(source: AskQuestionSource): string | null {
+    if (source.startPageNumber && source.endPageNumber) {
+      return source.startPageNumber === source.endPageNumber
+        ? source.startPageNumber.toString()
+        : `${source.startPageNumber}-${source.endPageNumber}`;
+    }
+
+    return null;
   }
 
   private restoreLastExchange(messages: ChatMessage[]): void {

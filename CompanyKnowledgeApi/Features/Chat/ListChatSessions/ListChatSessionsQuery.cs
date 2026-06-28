@@ -13,6 +13,7 @@ public sealed class ListChatSessionsQuery(AppDbContext dbContext)
     {
         var query = dbContext.ChatSessions
             .AsNoTracking()
+            .Where(session => !session.IsDeleted)
             .AsQueryable();
 
         query = model.Period switch

@@ -14,6 +14,8 @@ public sealed class Document
 
     public long SizeInBytes { get; set; }
 
+    public int? PageCount { get; set; }
+
     public Guid? DepartmentId { get; set; }
 
     public Department? Department { get; set; }

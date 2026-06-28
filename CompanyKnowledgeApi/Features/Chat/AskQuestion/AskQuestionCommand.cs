@@ -47,7 +47,11 @@ public sealed class AskQuestionCommand(
                 DocumentName = chunk.Document.FileName,
                 ChunkId = chunk.Id,
                 chunk.Content,
-                chunk.PageNumber,
+                chunk.StartPageNumber,
+                chunk.EndPageNumber,
+                chunk.Heading,
+                chunk.ClauseId,
+                chunk.ChunkType,
                 chunk.ChunkIndex,
                 Distance = chunk.Embedding!.CosineDistance(questionEmbedding)
             })
@@ -70,7 +74,11 @@ public sealed class AskQuestionCommand(
                 DocumentName: chunk.DocumentName,
                 ChunkId: chunk.ChunkId,
                 Content: chunk.Content,
-                PageNumber: chunk.PageNumber,
+                StartPageNumber: chunk.StartPageNumber,
+                EndPageNumber: chunk.EndPageNumber,
+                Heading: chunk.Heading,
+                ClauseId: chunk.ClauseId,
+                ChunkType: chunk.ChunkType,
                 ChunkIndex: chunk.ChunkIndex,
                 Score: Math.Round(1 - chunk.Distance, 4)))
             .ToList();
@@ -92,7 +100,7 @@ public sealed class AskQuestionCommand(
         if (model.SessionId.HasValue)
         {
             var existingSession = await dbContext.ChatSessions
-                .FirstOrDefaultAsync(session => session.Id == model.SessionId.Value, cancellationToken);
+                .FirstOrDefaultAsync(session => session.Id == model.SessionId.Value && !session.IsDeleted, cancellationToken);
 
             if (existingSession is not null)
             {
@@ -183,7 +191,9 @@ public sealed class AskQuestionCommand(
         {
             var source = sources[index];
             builder.AppendLine($"[{index + 1}] Doküman: {source.DocumentName}");
-            builder.AppendLine($"Sayfa: {source.PageNumber?.ToString() ?? "Yok"}");
+            builder.AppendLine($"Sayfa: {FormatPageRange(source)}");
+            builder.AppendLine($"Başlık: {source.Heading ?? "Yok"}");
+            builder.AppendLine($"Madde: {source.ClauseId ?? "Yok"}");
             builder.AppendLine($"Chunk: {source.ChunkIndex}");
             builder.AppendLine("İçerik:");
             builder.AppendLine(source.Content);
@@ -193,5 +203,17 @@ public sealed class AskQuestionCommand(
         builder.AppendLine("Yanıt:");
 
         return builder.ToString();
+    }
+
+    private static string FormatPageRange(AskQuestionSource source)
+    {
+        if (source.StartPageNumber.HasValue && source.EndPageNumber.HasValue)
+        {
+            return source.StartPageNumber == source.EndPageNumber
+                ? source.StartPageNumber.Value.ToString()
+                : $"{source.StartPageNumber}-{source.EndPageNumber}";
+        }
+
+        return "Yok";
     }
 }

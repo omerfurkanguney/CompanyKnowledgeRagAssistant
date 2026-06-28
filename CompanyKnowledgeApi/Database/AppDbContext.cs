@@ -109,6 +109,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.ToTable("document_chunks");
             entity.HasKey(chunk => chunk.Id);
             entity.Property(chunk => chunk.Content).IsRequired();
+            entity.Property(chunk => chunk.Heading).HasMaxLength(300);
+            entity.Property(chunk => chunk.ClauseId).HasMaxLength(120);
+            entity.Property(chunk => chunk.ChunkType).HasMaxLength(40).HasDefaultValue("Fixed").IsRequired();
             entity.Property(chunk => chunk.Embedding).HasColumnType("vector(1024)");
             entity.HasIndex(chunk => chunk.Embedding)
                 .HasMethod("hnsw")
@@ -120,6 +123,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.ToTable("chat_sessions");
             entity.HasKey(session => session.Id);
             entity.Property(session => session.Title).HasMaxLength(200);
+            entity.Property(session => session.IsDeleted).HasDefaultValue(false).IsRequired();
             entity.HasMany(session => session.Messages)
                 .WithOne(message => message.ChatSession)
                 .HasForeignKey(message => message.ChatSessionId)

@@ -5,6 +5,7 @@ public sealed record ListDocumentsResponse(
     string FileName,
     string ContentType,
     long SizeInBytes,
+    int? PageCount,
     Guid? DepartmentId,
     string? DepartmentName,
     Guid? CategoryId,

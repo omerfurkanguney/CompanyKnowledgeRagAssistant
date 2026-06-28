@@ -14,5 +14,9 @@ public sealed class ChatSession
 
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
+    public bool IsDeleted { get; set; }
+
+    public DateTimeOffset? DeletedAt { get; set; }
+
     public ICollection<ChatMessage> Messages { get; set; } = [];
 }

@@ -38,6 +38,10 @@ export class ApiService {
     return this.http.get<ChatSessionDetail>(`${this.apiUrl}/chat/sessions/${sessionId}`);
   }
 
+  deleteChatSession(sessionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/chat/sessions/${sessionId}`);
+  }
+
   listDocuments(): Observable<DocumentItem[]> {
     return this.http.get<DocumentItem[]>(`${this.apiUrl}/documents`);
   }

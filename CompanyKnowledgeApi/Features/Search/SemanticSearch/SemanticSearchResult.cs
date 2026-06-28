@@ -5,6 +5,10 @@ public sealed record SemanticSearchResult(
     string DocumentName,
     Guid ChunkId,
     string Content,
-    int? PageNumber,
+    int? StartPageNumber,
+    int? EndPageNumber,
+    string? Heading,
+    string? ClauseId,
+    string ChunkType,
     int ChunkIndex,
     double Score);

@@ -42,7 +42,11 @@ public sealed class SemanticSearchQuery(
                 DocumentName = chunk.Document.FileName,
                 ChunkId = chunk.Id,
                 chunk.Content,
-                chunk.PageNumber,
+                chunk.StartPageNumber,
+                chunk.EndPageNumber,
+                chunk.Heading,
+                chunk.ClauseId,
+                chunk.ChunkType,
                 chunk.ChunkIndex,
                 Distance = chunk.Embedding!.CosineDistance(questionEmbedding)
             })
@@ -57,7 +61,11 @@ public sealed class SemanticSearchQuery(
                     DocumentName: result.DocumentName,
                     ChunkId: result.ChunkId,
                     Content: result.Content,
-                    PageNumber: result.PageNumber,
+                    StartPageNumber: result.StartPageNumber,
+                    EndPageNumber: result.EndPageNumber,
+                    Heading: result.Heading,
+                    ClauseId: result.ClauseId,
+                    ChunkType: result.ChunkType,
                     ChunkIndex: result.ChunkIndex,
                     Score: Math.Round(1 - result.Distance, 4)))
                 .ToList());
