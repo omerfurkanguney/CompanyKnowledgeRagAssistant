@@ -113,6 +113,12 @@
   font-style: normal;
 }
 
+.empty-history {
+  padding: 16px 12px;
+  color: #667085;
+  font-size: 13px;
+}
+
 .conversation-panel {
   display: grid;
   grid-template-rows: auto 1fr auto;

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Pgvector;
 using Pgvector.EntityFrameworkCore;
 using System.Text;
+using System.Text.Json;
 
 namespace CompanyKnowledgeApi.Features.Chat.AskQuestion;
 
@@ -29,6 +30,7 @@ public sealed class AskQuestionCommand(
             return Results.ValidationProblem(validationResult.ToDictionary());
         }
 
+        var session = await GetOrCreateSessionAsync(model, cancellationToken);
         var topK = model.TopK ?? DefaultTopK;
         var embeddings = await embeddingService.EmbedAsync([model.Question], cancellationToken);
         var questionEmbedding = new Vector(embeddings[0]);
@@ -53,8 +55,12 @@ public sealed class AskQuestionCommand(
 
         if (chunks.Count == 0)
         {
+            const string noSourceAnswer = "Bu soruya yanıt verebilmek için ilgili kaynak bulunamadı.";
+            await SaveConversationAsync(session, model.Question, noSourceAnswer, [], cancellationToken);
+
             return Results.Ok(new AskQuestionResponse(
-                Answer: "Bu soruya yanıt verebilmek için ilgili kaynak bulunamadı.",
+                SessionId: session.Id,
+                Answer: noSourceAnswer,
                 Sources: []));
         }
 
@@ -76,7 +82,79 @@ public sealed class AskQuestionCommand(
             ],
             cancellationToken);
 
-        return Results.Ok(new AskQuestionResponse(answer, sources));
+        await SaveConversationAsync(session, model.Question, answer, sources, cancellationToken);
+
+        return Results.Ok(new AskQuestionResponse(session.Id, answer, sources));
+    }
+
+    private async Task<ChatSession> GetOrCreateSessionAsync(AskQuestionModel model, CancellationToken cancellationToken)
+    {
+        if (model.SessionId.HasValue)
+        {
+            var existingSession = await dbContext.ChatSessions
+                .FirstOrDefaultAsync(session => session.Id == model.SessionId.Value, cancellationToken);
+
+            if (existingSession is not null)
+            {
+                return existingSession;
+            }
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var session = new ChatSession
+        {
+            Id = Guid.NewGuid(),
+            Title = BuildSessionTitle(model.Question),
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        dbContext.ChatSessions.Add(session);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return session;
+    }
+
+    private async Task SaveConversationAsync(
+        ChatSession session,
+        string question,
+        string answer,
+        IReadOnlyList<AskQuestionSource> sources,
+        CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        dbContext.ChatMessages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid(),
+            ChatSessionId = session.Id,
+            Role = "user",
+            Content = question,
+            CreatedAt = now
+        });
+
+        dbContext.ChatMessages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid(),
+            ChatSessionId = session.Id,
+            Role = "assistant",
+            Content = answer,
+            SourcesJson = JsonSerializer.Serialize(sources),
+            CreatedAt = now
+        });
+
+        session.Title ??= BuildSessionTitle(question);
+        session.UpdatedAt = now;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static string BuildSessionTitle(string question)
+    {
+        var trimmedQuestion = question.Trim();
+        return trimmedQuestion.Length <= 80
+            ? trimmedQuestion
+            : $"{trimmedQuestion[..77]}...";
     }
 
     private static string BuildSystemPrompt()

@@ -1,4 +1,6 @@
 using CompanyKnowledgeApi.Features.Chat.AskQuestion;
+using CompanyKnowledgeApi.Features.Chat.GetChatSession;
+using CompanyKnowledgeApi.Features.Chat.ListChatSessions;
 
 namespace CompanyKnowledgeApi.Features.Chat;
 
@@ -10,6 +12,8 @@ public static class ChatEndpoints
             .WithTags("Chat");
 
         group.MapAskQuestionEndpoint();
+        group.MapListChatSessionsEndpoint();
+        group.MapGetChatSessionEndpoint();
 
         return app;
     }

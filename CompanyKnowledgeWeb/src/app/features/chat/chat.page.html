@@ -2,7 +2,7 @@
   <aside class="surface history-panel">
     <div class="history-header">
       <h1>Sohbet Geçmişi</h1>
-      <button mat-flat-button type="button">
+      <button mat-flat-button type="button" (click)="newChat()">
         <mat-icon>add</mat-icon>
         Yeni Sohbet
       </button>
@@ -15,29 +15,33 @@
     </div>
 
     <div class="history-list">
-      @for (chat of chatHistory; track chat.title) {
-        <button type="button" [class.active]="chat.active">
+      @for (chat of chatSessions(); track chat.id) {
+        <button type="button" [class.active]="currentSessionId() === chat.id" (click)="selectSession(chat)">
           <mat-icon>chat_bubble_outline</mat-icon>
           <span>{{ chat.title }}</span>
-          <em>{{ chat.time }}</em>
+          <em>{{ formatSessionTime(chat.updatedAt) }}</em>
         </button>
       }
+      @if (!loadingSessions() && chatSessions().length === 0) {
+        <div class="empty-history">Henüz sohbet yok.</div>
+      }
     </div>
-
-    <div class="history-count">Toplam {{ chatHistory.length }} sohbet</div>
+    <div class="history-count">Toplam {{ chatSessions().length }} sohbet</div>
   </aside>
 
   <main class="surface conversation-panel">
     <header class="conversation-header">
-      <h2>Konu: Yıllık İzin Politikası</h2>
+      <h2>Konu: {{ activeSessionTitle() }}</h2>
       <mat-icon>info</mat-icon>
     </header>
 
     <div class="conversation-body">
+      @if (lastQuestion()) {
       <div class="message user-message">
         <p>{{ lastQuestion() }}</p>
         <span>{{ now | date:'HH:mm' }} ✓✓</span>
       </div>
+      }
 
       <div class="assistant-row">
         <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>

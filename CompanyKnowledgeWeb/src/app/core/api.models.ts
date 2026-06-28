@@ -1,9 +1,11 @@
 export interface AskQuestionRequest {
   question: string;
   topK: number;
+  sessionId?: string | null;
 }
 
 export interface AskQuestionResponse {
+  sessionId: string;
   answer: string;
   sources: AskQuestionSource[];
 }
@@ -113,4 +115,28 @@ export interface DocumentCategoryLookup {
   id: string;
   name: string;
   slug: string;
+}
+
+export interface ChatSessionSummary {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messageCount: number;
+}
+
+export interface ChatSessionDetail {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | string;
+  content: string;
+  sources: AskQuestionSource[];
+  createdAt: string;
 }

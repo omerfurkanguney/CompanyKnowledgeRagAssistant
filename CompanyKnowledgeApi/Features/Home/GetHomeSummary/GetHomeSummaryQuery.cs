@@ -20,6 +20,16 @@ public sealed class GetHomeSummaryQuery(AppDbContext dbContext)
             .AsNoTracking()
             .CountAsync(cancellationToken);
 
+        var todayUtc = DateTimeOffset.UtcNow.Date;
+        var tomorrowUtc = todayUtc.AddDays(1);
+        var todayQuestionCount = await dbContext.ChatMessages
+            .AsNoTracking()
+            .CountAsync(message =>
+                message.Role == "user" &&
+                message.CreatedAt >= todayUtc &&
+                message.CreatedAt < tomorrowUtc,
+                cancellationToken);
+
         var recentDocuments = await dbContext.Documents
             .AsNoTracking()
             .Where(document => document.Status != DocumentStatus.Deleted)
@@ -91,7 +101,7 @@ public sealed class GetHomeSummaryQuery(AppDbContext dbContext)
         return new GetHomeSummaryResponse(
             TotalDocumentCount: totalDocumentCount,
             TotalUserCount: totalUserCount,
-            TodayQuestionCount: 0,
+            TodayQuestionCount: todayQuestionCount,
             RecentDocuments: recentDocuments,
             DepartmentDocumentCounts: departmentDocumentCounts,
             CategoryDocumentCounts: categoryDocumentCounts);

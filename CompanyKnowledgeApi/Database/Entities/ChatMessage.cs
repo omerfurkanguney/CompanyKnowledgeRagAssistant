@@ -12,6 +12,8 @@ public sealed class ChatMessage
 
     public string Content { get; set; } = string.Empty;
 
+    public string? SourcesJson { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public ICollection<ChatFeedback> Feedback { get; set; } = [];

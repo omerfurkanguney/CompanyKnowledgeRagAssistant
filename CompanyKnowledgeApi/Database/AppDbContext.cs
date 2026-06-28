@@ -37,7 +37,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasMany(user => user.ChatSessions)
                 .WithOne(session => session.User)
                 .HasForeignKey(session => session.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -132,6 +132,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.HasKey(message => message.Id);
             entity.Property(message => message.Role).HasMaxLength(40).IsRequired();
             entity.Property(message => message.Content).IsRequired();
+            entity.Property(message => message.SourcesJson).HasColumnType("jsonb");
             entity.HasMany(message => message.Feedback)
                 .WithOne(feedback => feedback.ChatMessage)
                 .HasForeignKey(feedback => feedback.ChatMessageId)

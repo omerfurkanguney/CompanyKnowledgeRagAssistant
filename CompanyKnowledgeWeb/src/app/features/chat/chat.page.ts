@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { ApiService } from '../../core/api.service';
-import { AskQuestionResponse } from '../../core/api.models';
+import { AskQuestionResponse, ChatMessage, ChatSessionSummary } from '../../core/api.models';
 
 @Component({
   selector: 'app-chat-page',
@@ -25,7 +25,7 @@ import { AskQuestionResponse } from '../../core/api.models';
   styleUrl: './chat.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatPage {
+export class ChatPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -35,9 +35,15 @@ export class ChatPage {
   });
   protected readonly topK = signal(4);
   protected readonly loading = signal(false);
+  protected readonly loadingSessions = signal(false);
   protected readonly response = signal<AskQuestionResponse | null>(null);
+  protected readonly chatSessions = signal<ChatSessionSummary[]>([]);
+  protected readonly currentSessionId = signal<string | null>(null);
+  protected readonly currentMessages = signal<ChatMessage[]>([]);
   protected readonly lastQuestion = signal('Yıllık izin kaç gün önceden talep edilmelidir?');
   protected readonly now = new Date();
+  protected readonly activeSessionTitle = computed(() =>
+    this.chatSessions().find((session) => session.id === this.currentSessionId())?.title ?? 'Yeni Sohbet');
   protected readonly answerLines = computed(() => this.response()?.answer.split('\n') ?? [
     'Yıllık izin talepleri, planlanan başlangıç tarihinden en az 10 iş günü öncesinden yöneticinize iletilmelidir.',
     'Beş iş gününden kısa izin taleplerinde ise en az 5 iş günü önce başvuru yapılması yeterlidir.',
@@ -52,14 +58,6 @@ export class ChatPage {
     return Math.round(average * 100);
   });
 
-  protected readonly chatHistory = [
-    { title: 'Yıllık izin talebi nasıl yapılır?', time: '10:24', active: true },
-    { title: 'Masraf iadesi için hangi belgeler gerekli?', time: '09:48', active: false },
-    { title: 'Uzaktan çalışma gün sınırı nedir?', time: 'Dün', active: false },
-    { title: 'Onboarding süreci kaç gün sürer?', time: 'Dün', active: false },
-    { title: 'Bilgi güvenliği ihlali nasıl bildirilir?', time: '11 Haz', active: false },
-  ];
-
   protected readonly suggestedQuestions = [
     'Yıllık izin devredilir mi?',
     'Yarım gün izin alınabilir mi?',
@@ -69,6 +67,40 @@ export class ChatPage {
     'Onboarding süreci kaç gün sürer?',
     'Bilgi güvenliği ihlali nasıl bildirilir?',
   ];
+
+  ngOnInit(): void {
+    this.loadChatSessions();
+  }
+
+  loadChatSessions(): void {
+    this.loadingSessions.set(true);
+    this.api
+      .listChatSessions()
+      .pipe(finalize(() => this.loadingSessions.set(false)))
+      .subscribe({
+        next: (sessions) => this.chatSessions.set(sessions),
+        error: () => this.snackBar.open('Sohbet geçmişi alınamadı.', 'Kapat', { duration: 4000 }),
+      });
+  }
+
+  newChat(): void {
+    this.currentSessionId.set(null);
+    this.currentMessages.set([]);
+    this.response.set(null);
+    this.lastQuestion.set('');
+    this.question.setValue('');
+  }
+
+  selectSession(session: ChatSessionSummary): void {
+    this.currentSessionId.set(session.id);
+    this.api.getChatSession(session.id).subscribe({
+      next: (detail) => {
+        this.currentMessages.set(detail.messages);
+        this.restoreLastExchange(detail.messages);
+      },
+      error: () => this.snackBar.open('Sohbet detayı alınamadı.', 'Kapat', { duration: 4000 }),
+    });
+  }
 
   ask(): void {
     if (this.question.invalid || this.loading()) {
@@ -85,15 +117,45 @@ export class ChatPage {
       .askQuestion({
         question,
         topK: this.topK(),
+        sessionId: this.currentSessionId(),
       })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (response) => this.response.set(response),
+        next: (response) => {
+          this.response.set(response);
+          this.currentSessionId.set(response.sessionId);
+          this.loadChatSessions();
+        },
         error: () => this.snackBar.open('Cevap alınamadı. API ve Ollama durumunu kontrol et.', 'Kapat', { duration: 5000 }),
       });
   }
 
   setExample(text: string): void {
     this.question.setValue(text);
+  }
+
+  formatSessionTime(updatedAt: string): string {
+    return new Date(updatedAt).toLocaleTimeString('tr-TR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  private restoreLastExchange(messages: ChatMessage[]): void {
+    const lastAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
+    const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
+
+    this.lastQuestion.set(lastUserMessage?.content ?? '');
+
+    if (lastAssistantMessage) {
+      this.response.set({
+        sessionId: this.currentSessionId() ?? '',
+        answer: lastAssistantMessage.content,
+        sources: lastAssistantMessage.sources,
+      });
+      return;
+    }
+
+    this.response.set(null);
   }
 }

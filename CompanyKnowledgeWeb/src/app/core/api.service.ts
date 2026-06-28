@@ -6,6 +6,8 @@ import {
   ApiInfo,
   AskQuestionRequest,
   AskQuestionResponse,
+  ChatSessionDetail,
+  ChatSessionSummary,
   DepartmentLookup,
   DocumentCategoryLookup,
   DocumentItem,
@@ -24,6 +26,14 @@ export class ApiService {
 
   askQuestion(request: AskQuestionRequest): Observable<AskQuestionResponse> {
     return this.http.post<AskQuestionResponse>(`${this.apiUrl}/chat/ask`, request);
+  }
+
+  listChatSessions(): Observable<ChatSessionSummary[]> {
+    return this.http.get<ChatSessionSummary[]>(`${this.apiUrl}/chat/sessions`);
+  }
+
+  getChatSession(sessionId: string): Observable<ChatSessionDetail> {
+    return this.http.get<ChatSessionDetail>(`${this.apiUrl}/chat/sessions/${sessionId}`);
   }
 
   listDocuments(): Observable<DocumentItem[]> {
