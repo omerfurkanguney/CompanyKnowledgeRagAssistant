@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +14,6 @@ import { AskQuestionResponse } from '../../core/api.models';
   selector: 'app-chat-page',
   imports: [
     DatePipe,
-    DecimalPipe,
     ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
@@ -61,34 +60,14 @@ export class ChatPage {
     { title: 'Bilgi güvenliği ihlali nasıl bildirilir?', time: '11 Haz', active: false },
   ];
 
-  protected readonly fallbackSources = [
-    {
-      documentName: '01-yillik-izin-politikasi.pdf',
-      content: 'Yıllık izin talepleri en az 10 iş günü öncesinden yöneticinize iletilmelidir...',
-      pageNumber: 8,
-      chunkIndex: 5,
-      score: 0.94,
-    },
-    {
-      documentName: '08-calisan-el-kitabi-genel-kurallar.pdf',
-      content: 'İzin türleri ve başvuru süreçleri hakkında detaylı bilgiler yer almaktadır...',
-      pageNumber: 3,
-      chunkIndex: 2,
-      score: 0.72,
-    },
-    {
-      documentName: '02-uzaktan-calisma-politikasi.docx',
-      content: 'Uzaktan çalışma uygulamaları ve sık sorulan sorular bu bölümde...',
-      pageNumber: 12,
-      chunkIndex: 1,
-      score: 0.59,
-    },
-  ];
-
   protected readonly suggestedQuestions = [
     'Yıllık izin devredilir mi?',
     'Yarım gün izin alınabilir mi?',
     'İzin iptali nasıl yapılır?',
+    'Masraf iadesi için hangi belgeler gerekir?',
+    'Uzaktan çalışma gün sınırı nedir?',
+    'Onboarding süreci kaç gün sürer?',
+    'Bilgi güvenliği ihlali nasıl bildirilir?',
   ];
 
   ask(): void {

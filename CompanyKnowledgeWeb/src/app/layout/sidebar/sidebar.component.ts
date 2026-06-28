@@ -27,4 +27,6 @@ export class SidebarComponent {
   @Input({ required: true }) navItems: SidebarNavItem[] = [];
   @Input() collapsed = false;
   @Output() toggleCollapsed = new EventEmitter<void>();
+
+  protected readonly appVersion = 'v0.1.0';
 }

@@ -30,7 +30,7 @@
       <section class="surface recent-panel">
         <div class="panel-heading">
           <h2 class="panel-title">Son Eklenen Dokümanlar</h2>
-          <a>Tümünü Gör</a>
+          <a routerLink="/documents">Tümünü Gör</a>
         </div>
         <table class="mini-table">
           <thead>
@@ -107,33 +107,6 @@
     </main>
 
     <aside class="right-column">
-      <section class="surface sources-panel">
-        <div class="panel-heading">
-          <h2 class="panel-title">Getirilen Kaynaklar</h2>
-          <mat-icon>info</mat-icon>
-        </div>
-        @for (source of sources; track source.name) {
-          <article class="source-card">
-            <span class="file-badge" [class.word]="source.name.endsWith('.docx')">{{ source.name.endsWith('.docx') ? 'W' : 'PDF' }}</span>
-            <div>
-              <strong>{{ source.name }}</strong>
-              <p>İlgili politika metninden getirilen kaynak özeti...</p>
-              <span>Bölüm {{ source.section }} · Sayfa {{ source.page }}</span>
-            </div>
-            <em>%{{ source.score }}</em>
-          </article>
-        }
-        <button type="button" class="view-all">Tüm kaynakları görüntüle <mat-icon>arrow_forward</mat-icon></button>
-      </section>
-
-      <section class="surface quality-panel">
-        <h2 class="panel-title">Yanıt Kalitesi</h2>
-        <div class="quality-grid">
-          <div><span>Güven Skoru</span><strong>%92</strong><em>Yüksek</em></div>
-          <div><span>Getirme Süresi</span><strong>1.42 sn</strong><em>İyi</em></div>
-          <div><span>Chunk Sayısı</span><strong>6</strong><em>Uygun</em></div>
-        </div>
-      </section>
 
       <section class="surface suggestions-panel">
         <div class="panel-heading">

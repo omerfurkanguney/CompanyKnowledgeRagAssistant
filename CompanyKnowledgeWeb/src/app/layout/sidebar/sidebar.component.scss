@@ -63,7 +63,7 @@
 .tenant-card {
   position: absolute;
   right: 14px;
-  bottom: 76px;
+  bottom: 122px;
   left: 14px;
   display: grid;
   grid-template-columns: 46px 1fr 20px;
@@ -98,6 +98,29 @@
   color: #155eef;
 }
 
+.version-info {
+  position: absolute;
+  right: 14px;
+  bottom: 76px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #e5eaf2;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 12px;
+}
+
+.version-info strong {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .collapse-button {
   position: absolute;
   right: 14px;
@@ -116,8 +139,14 @@
 .collapsed .brand-copy,
 .collapsed .nav-label,
 .collapsed .tenant-card,
-.collapsed .collapse-button span {
+.collapsed .collapse-button span,
+.collapsed .version-info span {
   display: none;
+}
+
+.collapsed .version-info {
+  justify-content: center;
+  padding: 0;
 }
 
 .collapsed .nav-list a {
@@ -141,7 +170,13 @@
 
   .brand-copy,
   .tenant-card,
+  .version-info span,
   .collapse-button span {
     display: none;
+  }
+
+  .version-info {
+    justify-content: center;
+    padding: 0;
   }
 }

@@ -54,9 +54,9 @@ export class DocumentsPage implements OnInit {
   protected readonly selectedStatus = signal('');
   protected readonly displayedColumns = ['fileName', 'type', 'createdAt', 'status', 'actions'];
   protected readonly indexedCount = computed(() => this.documents().filter((document) => document.status === 'Indexed').length);
-  protected readonly processingCount = computed(() =>
-    this.documents().filter((document) => document.status === 'Processing' || document.status === 'Embedding').length);
-  protected readonly categoryCount = computed(() => Math.min(12, Math.max(1, new Set(this.documents().map((document) => this.documentCategory(document))).size)));
+  protected readonly processedCount = computed(() =>
+    this.documents().filter((document) => document.status === 'Processed' || document.status === 'Indexed').length);
+  protected readonly failedCount = computed(() => this.documents().filter((document) => document.status === 'Failed').length);
   protected readonly fileTypeOptions = computed(() =>
     Array.from(new Set(this.documents().map((document) => this.documentType(document)))).sort());
   protected readonly statusOptions = computed(() =>

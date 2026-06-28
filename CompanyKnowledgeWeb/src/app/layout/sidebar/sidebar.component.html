@@ -29,6 +29,11 @@
     <mat-icon>expand_more</mat-icon>
   </div>
 
+  <div class="version-info">
+    <span>Demo Sürüm</span>
+    <strong>{{ appVersion }}</strong>
+  </div>
+
   <button mat-button type="button" class="collapse-button" (click)="toggleCollapsed.emit()">
     <mat-icon>{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
     <span>Menüyü Daralt</span>

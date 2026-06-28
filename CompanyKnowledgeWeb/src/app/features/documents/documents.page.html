@@ -19,20 +19,20 @@
     </article>
 
     <article class="surface metric-card">
-      <span class="metric-icon warning"><mat-icon>schedule</mat-icon></span>
+      <span class="metric-icon warning"><mat-icon>task_alt</mat-icon></span>
       <div>
-        <div class="metric-label">İşleniyor</div>
-        <div class="metric-value">{{ processingCount() }}</div>
-        <div class="metric-trend warning-text">Aktif işlem</div>
+        <div class="metric-label">İşlenen</div>
+        <div class="metric-value">{{ processedCount() }}</div>
+        <div class="metric-trend warning-text">Metin hazır</div>
       </div>
     </article>
 
     <article class="surface metric-card">
-      <span class="metric-icon purple"><mat-icon>folder</mat-icon></span>
+      <span class="metric-icon danger"><mat-icon>error</mat-icon></span>
       <div>
-        <div class="metric-label">Kategori</div>
-        <div class="metric-value">{{ categoryCount() }}</div>
-        <div class="metric-trend">türetilmiş</div>
+        <div class="metric-label">Hata</div>
+        <div class="metric-value">{{ failedCount() }}</div>
+        <div class="metric-trend danger-text">Kontrol gerekli</div>
       </div>
     </article>
   </section>
@@ -42,7 +42,7 @@
       <section class="surface filter-bar">
         <div class="search-control">
           <mat-icon>search</mat-icon>
-          <input type="search" placeholder="Dosya adı, kategori veya departman ara..." (input)="searchTerm.set($any($event.target).value)" />
+          <input type="search" placeholder="Dosya adı ara..." (input)="searchTerm.set($any($event.target).value)" />
         </div>
         <mat-form-field class="filter-select" appearance="outline" subscriptSizing="dynamic">
           <mat-label>Kategori</mat-label>

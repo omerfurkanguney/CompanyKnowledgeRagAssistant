@@ -96,30 +96,17 @@
   </main>
 
   <aside class="right-column">
-    <section class="surface sources-panel">
+    <section class="surface suggestions-panel">
       <div class="panel-heading">
-        <h2 class="panel-title">Getirilen Kaynaklar</h2>
-        <mat-icon>info</mat-icon>
+        <h2 class="panel-title">Önerilen Sorular</h2>
+        <mat-icon>refresh</mat-icon>
       </div>
-
-      @for (source of (response()?.sources?.length ? response()!.sources : fallbackSources); track source.documentName) {
-        <article class="source-card">
-          <span class="file-badge" [class.word]="source.documentName.endsWith('.docx')">
-            {{ source.documentName.endsWith('.docx') ? 'W' : 'PDF' }}
-          </span>
-          <div>
-            <strong>{{ source.documentName }}</strong>
-            <p>{{ source.content }}</p>
-            <span>Bölüm {{ source.chunkIndex }} · Sayfa {{ source.pageNumber ?? '-' }}</span>
-          </div>
-          <em>%{{ source.score * 100 | number:'1.0-0' }}</em>
-        </article>
+      @for (question of suggestedQuestions; track question) {
+        <button type="button" (click)="setExample(question)">
+          <mat-icon>arrow_forward</mat-icon>
+          {{ question }}
+        </button>
       }
-
-      <button type="button" class="view-all">
-        Tüm kaynakları görüntüle
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
     </section>
 
     <section class="surface summary-panel">
@@ -144,19 +131,6 @@
           <em>Uygun</em>
         </div>
       </div>
-    </section>
-
-    <section class="surface suggestions-panel">
-      <div class="panel-heading">
-        <h2 class="panel-title">Önerilen Sorular</h2>
-        <mat-icon>refresh</mat-icon>
-      </div>
-      @for (question of suggestedQuestions; track question) {
-        <button type="button" (click)="setExample(question)">
-          <mat-icon>arrow_forward</mat-icon>
-          {{ question }}
-        </button>
-      }
     </section>
   </aside>
 </section>
