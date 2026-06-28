@@ -20,20 +20,32 @@ interface ReleaseNote {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReleaseNotesPage {
-  protected readonly currentVersion = 'v0.1.0';
+  protected readonly currentVersion = 'v0.2.0';
 
   protected readonly notes: ReleaseNote[] = [
+    {
+      version: 'v0.2.0',
+      date: 'Haziran 2026',
+      title: 'Sohbet geçmişi eklendi',
+      status: 'Mevcut sürüm',
+      highlights: [
+        'Sohbet oturumları veritabanında kalıcı hale getirildi.',
+        'Aynı sohbet içindeki kullanıcı soruları ve asistan cevapları alt alta gösterilecek şekilde düzenlendi.',
+        'Yeni sohbet başlatma ve eski sohbeti seçip devam etme akışı hazırlandı.',
+        'Home ekranındaki bugünkü sorgu sayısı sohbet mesajlarından hesaplanır hale getirildi.',
+      ],
+      tags: ['Chat Sessions', 'Chat Messages', 'History', 'Angular UI'],
+    },
     {
       version: 'v0.1.0',
       date: 'Haziran 2026',
       title: 'MVP RAG deneyimi',
-      status: 'Mevcut sürüm',
+      status: 'Tamamlandı',
       highlights: [
         'Doküman yükleme, metin işleme, chunk üretimi ve embedding akışı eklendi.',
         'PostgreSQL + pgvector ile semantic search ve RAG cevap üretimi bağlandı.',
         'Ollama tabanlı lokal embedding ve chat modeli desteği hazırlandı.',
         'Angular arayüzünde Home, Dokümanlar, Sohbet, Kaynaklar ve Ayarlar ekranları oluşturuldu.',
-        'Sohbet geçmişi ChatSession ve ChatMessage tabloları ile kalıcı hale getirildi.',
       ],
       tags: ['.NET 10', 'Angular 22', 'PostgreSQL', 'pgvector', 'Ollama'],
     },

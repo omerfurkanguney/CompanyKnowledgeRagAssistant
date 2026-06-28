@@ -45,7 +45,13 @@
               <tr>
                 <td>{{ document.fileName }}</td>
                 <td>{{ documentType(document) }}</td>
-                <td><span class="status-pill" [class.processing]="document.status === 'Processing' || document.status === 'Embedding'">{{ statusLabel(document.status) }}</span></td>
+                <td>
+                  <span
+                    class="status-pill"
+                    [class.processing]="document.status === 'Processing' || document.status === 'Embedding'">
+                    {{ statusLabel(document.status) }}
+                  </span>
+                </td>
               </tr>
             }
           </tbody>
@@ -107,13 +113,22 @@
     </main>
 
     <aside class="right-column">
-
       <section class="surface suggestions-panel">
         <div class="panel-heading">
           <h2 class="panel-title">Önerilen Sorular</h2>
           <mat-icon>refresh</mat-icon>
         </div>
-        @for (question of suggestedQuestions; track question) {
+
+        <mat-form-field appearance="outline" class="question-topic-select">
+          <mat-label>Politika seç</mat-label>
+          <mat-select [value]="selectedQuestionTopic()" (selectionChange)="selectedQuestionTopic.set($event.value)">
+            @for (topic of questionTopics; track topic.key) {
+              <mat-option [value]="topic.key">{{ topic.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @for (question of suggestedQuestions(); track question) {
           <button type="button"><mat-icon>arrow_forward</mat-icon>{{ question }}</button>
         }
       </section>

@@ -1,14 +1,22 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { AskQuestionResponse, ChatMessage, ChatSessionSummary } from '../../core/api.models';
+
+interface SuggestedQuestionTopic {
+  key: string;
+  label: string;
+  questions: string[];
+}
 
 @Component({
   selector: 'app-chat-page',
@@ -16,9 +24,11 @@ import { AskQuestionResponse, ChatMessage, ChatSessionSummary } from '../../core
     DatePipe,
     ReactiveFormsModule,
     MatButtonModule,
+    MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     MatSnackBarModule,
   ],
   templateUrl: './chat.page.html',
@@ -40,6 +50,7 @@ export class ChatPage implements OnInit {
   protected readonly chatSessions = signal<ChatSessionSummary[]>([]);
   protected readonly currentSessionId = signal<string | null>(null);
   protected readonly currentMessages = signal<ChatMessage[]>([]);
+  protected readonly selectedQuestionTopic = signal('annualLeave');
   protected readonly now = new Date();
   protected readonly activeSessionTitle = computed(() =>
     this.chatSessions().find((session) => session.id === this.currentSessionId())?.title ?? 'Yeni Sohbet');
@@ -53,15 +64,98 @@ export class ChatPage implements OnInit {
     return Math.round(average * 100);
   });
 
-  protected readonly suggestedQuestions = [
-    'Yıllık izin devredilir mi?',
-    'Yarım gün izin alınabilir mi?',
-    'İzin iptali nasıl yapılır?',
-    'Masraf iadesi için hangi belgeler gerekir?',
-    'Uzaktan çalışma gün sınırı nedir?',
-    'Onboarding süreci kaç gün sürer?',
-    'Bilgi güvenliği ihlali nasıl bildirilir?',
+  protected readonly questionTopics: SuggestedQuestionTopic[] = [
+    {
+      key: 'annualLeave',
+      label: 'Yıllık İzin Politikası',
+      questions: [
+        'Yıllık izin kaç gün önceden talep edilmelidir?',
+        'Beş iş gününden kısa izinlerde kaç gün önce başvuru yapmak gerekir?',
+        'Yıllık izin talebi hangi sistem üzerinden oluşturulur?',
+        'Yıllık izin talebini kim onaylar?',
+        'Hafta sonları yıllık izinden düşülür mü?',
+      ],
+    },
+    {
+      key: 'remoteWork',
+      label: 'Uzaktan Çalışma Politikası',
+      questions: [
+        'Haftada kaç gün uzaktan çalışabilirim?',
+        'Haftada kaç gün ofiste bulunmak gerekir?',
+        'Uzaktan çalışma talebi kaç gün önce oluşturulmalıdır?',
+        'Aynı gün uzaktan çalışma talebi oluşturulabilir mi?',
+        'Uzaktan çalışma talebi hangi sistemden yapılır?',
+      ],
+    },
+    {
+      key: 'expense',
+      label: 'Masraf İade Politikası',
+      questions: [
+        'Masraf iadesi için hangi belgeler gerekir?',
+        'Masraf talebi kaç gün içinde yapılmalıdır?',
+        'Seyahat masrafları kaç gün içinde bildirilmelidir?',
+        'Masraf iadeleri ne zaman ödenir?',
+        'İnternet desteği ne kadar?',
+      ],
+    },
+    {
+      key: 'security',
+      label: 'Bilgi Güvenliği Politikası',
+      questions: [
+        'Şirket sistemlerine uzaktan erişirken VPN kullanmak zorunlu mu?',
+        'Çok faktörlü kimlik doğrulama hangi sistemlerde zorunludur?',
+        'Şüpheli e-posta alırsam ne yapmalıyım?',
+        'Şirket verilerini kişisel e-posta adresime gönderebilir miyim?',
+        'Şirket dokümanlarını kişisel bulut hesabıma yükleyebilir miyim?',
+      ],
+    },
+    {
+      key: 'equipment',
+      label: 'Ekipman ve Zimmet Politikası',
+      questions: [
+        'Şirket laptopum kaybolursa ne yapmalıyım?',
+        'Kayıp veya çalıntı cihaz kaç saat içinde bildirilmelidir?',
+        'Şirket cihazını aile üyem kullanabilir mi?',
+        'Zimmetli ekipmanı ne zaman iade etmeliyim?',
+        'İşten ayrılırken ekipman teslim süresi nedir?',
+      ],
+    },
+    {
+      key: 'onboarding',
+      label: 'Onboarding Politikası',
+      questions: [
+        'Yeni çalışan onboarding süreci kaç gün sürer?',
+        'İlk gün hangi işlemler yapılır?',
+        'Buddy sistemi nedir?',
+        'Yeni çalışanın şirket hesapları ne zaman açılır?',
+        'Deneme sürecinde değerlendirme ne zaman yapılır?',
+      ],
+    },
+    {
+      key: 'performance',
+      label: 'Performans Değerlendirme Politikası',
+      questions: [
+        'Performans değerlendirmesi yılda kaç kez yapılır?',
+        'Hedefler ne zaman belirlenir?',
+        'Ara değerlendirme hangi ay yapılır?',
+        'Yıl sonu değerlendirmesi hangi ay yapılır?',
+        'Düşük performans durumunda ne yapılır?',
+      ],
+    },
+    {
+      key: 'handbook',
+      label: 'Çalışan El Kitabı Genel Kurallar',
+      questions: [
+        'Şirketin standart çalışma saatleri nedir?',
+        'Öğle arası hangi saatler arasındadır?',
+        'Devamsızlık durumunda kime haber vermeliyim?',
+        'Toplantılara geç kalırsam ne yapmalıyım?',
+        'Şirket içi iletişimde hangi kanallar kullanılır?',
+      ],
+    },
   ];
+  protected readonly suggestedQuestions = computed(() =>
+    this.questionTopics.find((topic) => topic.key === this.selectedQuestionTopic())?.questions ?? []);
 
   ngOnInit(): void {
     this.loadChatSessions();

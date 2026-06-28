@@ -116,7 +116,17 @@
         <h2 class="panel-title">Önerilen Sorular</h2>
         <mat-icon>refresh</mat-icon>
       </div>
-      @for (question of suggestedQuestions; track question) {
+
+      <mat-form-field appearance="outline" class="question-topic-select">
+        <mat-label>Politika seç</mat-label>
+        <mat-select [value]="selectedQuestionTopic()" (selectionChange)="selectedQuestionTopic.set($event.value)">
+          @for (topic of questionTopics; track topic.key) {
+            <mat-option [value]="topic.key">{{ topic.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @for (question of suggestedQuestions(); track question) {
         <button type="button" (click)="setExample(question)">
           <mat-icon>arrow_forward</mat-icon>
           {{ question }}

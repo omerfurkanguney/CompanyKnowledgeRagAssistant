@@ -28,5 +28,5 @@ export class SidebarComponent {
   @Input() collapsed = false;
   @Output() toggleCollapsed = new EventEmitter<void>();
 
-  protected readonly appVersion = 'v0.1.0';
+  protected readonly appVersion = 'v0.2.0';
 }
