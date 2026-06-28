@@ -1,10 +1,14 @@
 .system-header {
+  display: grid;
   grid-template-columns: 1fr auto;
   align-items: end;
+  gap: 16px;
+  min-width: 0;
 }
 
 .system-panel {
-  overflow: hidden;
+  overflow: auto;
+  min-width: 0;
 }
 
 .metrics {
@@ -12,6 +16,7 @@
   grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 1px;
   background: #dde3ea;
+  min-width: 0;
 }
 
 .metric {
@@ -20,6 +25,7 @@
   min-height: 116px;
   padding: 18px;
   background: #ffffff;
+  min-width: 0;
 }
 
 .metric span {
@@ -29,11 +35,31 @@
 
 .metric strong {
   font-size: 17px;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 @media (max-width: 900px) {
+  .system-header {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .system-header button {
+    width: fit-content;
+  }
+
   .metrics {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .system-header button {
+    width: 100%;
+  }
+
+  .metric {
+    padding: 14px;
   }
 }

@@ -4,6 +4,7 @@
   gap: 14px;
   height: 100%;
   min-height: 0;
+  min-width: 0;
 }
 
 .metrics-grid {
@@ -18,6 +19,7 @@
   gap: 14px;
   align-items: start;
   min-height: 0;
+  min-width: 0;
 }
 
 .main-column,
@@ -25,6 +27,7 @@
   display: grid;
   gap: 14px;
   min-height: 0;
+  min-width: 0;
 }
 
 .main-column {
@@ -36,6 +39,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px;
+  min-width: 0;
 }
 
 .search-control {
@@ -48,6 +52,7 @@
   padding: 0 14px;
   border: 1px solid #dbe3ef;
   border-radius: 10px;
+  min-width: 0;
 }
 
 .search-control input {
@@ -80,6 +85,7 @@
 
 table {
   width: 100%;
+  min-width: 880px;
 }
 
 tr.mat-mdc-row {
@@ -98,6 +104,9 @@ tr.mat-mdc-row {
 }
 
 .source-cell strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #111827;
 }
 
@@ -199,6 +208,9 @@ tr.mat-mdc-row {
 }
 
 .selected-source strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #111827;
   font-size: 15px;
 }
@@ -259,16 +271,102 @@ dd {
 }
 
 @media (max-width: 1320px) {
+  .sources-dashboard {
+    grid-template-rows: auto auto;
+    height: auto;
+    min-height: 100%;
+  }
+
   .metrics-grid,
   .sources-layout {
     grid-template-columns: 1fr;
+  }
+
+  .main-column {
+    grid-template-rows: auto auto auto;
+  }
+
+  .details-column {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
   }
 
   .filter-bar {
     flex-wrap: wrap;
   }
 
+  .search-control {
+    width: min(420px, 100%);
+  }
+
   .type-bars {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 980px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .details-column {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search-control {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .filter-spacer {
+    display: none;
+  }
+
+  .filter-bar > button {
+    width: 100%;
+  }
+
+  .table-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pagination {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .metrics-grid,
+  .filter-bar,
+  .type-bars {
+    grid-template-columns: 1fr;
+  }
+
+  .table-title,
+  .table-footer,
+  .source-types-panel,
+  .details-panel,
+  .quick-actions {
+    padding: 14px;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+    gap: 4px 0;
+  }
+
+  dd {
+    margin-bottom: 8px;
+  }
+
+  .source-cell {
+    min-width: 220px;
   }
 }
