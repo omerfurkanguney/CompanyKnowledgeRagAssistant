@@ -183,8 +183,9 @@ export class ChatPage implements OnInit {
     this.currentSessionId.set(session.id);
     this.api.getChatSession(session.id).subscribe({
       next: (detail) => {
-        this.currentMessages.set(detail.messages);
-        this.restoreLastExchange(detail.messages);
+        const messages = this.sortMessages(detail.messages);
+        this.currentMessages.set(messages);
+        this.restoreLastExchange(messages);
       },
       error: () => this.snackBar.open('Sohbet detayı alınamadı.', 'Kapat', { duration: 4000 }),
     });
@@ -271,5 +272,21 @@ export class ChatPage implements OnInit {
     }
 
     this.response.set(null);
+  }
+
+  private sortMessages(messages: ChatMessage[]): ChatMessage[] {
+    return [...messages].sort((left, right) => {
+      const dateCompare = new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+
+      if (dateCompare !== 0) {
+        return dateCompare;
+      }
+
+      return this.roleOrder(left.role) - this.roleOrder(right.role);
+    });
+  }
+
+  private roleOrder(role: string): number {
+    return role === 'user' ? 0 : 1;
   }
 }

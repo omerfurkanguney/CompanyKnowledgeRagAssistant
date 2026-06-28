@@ -28,6 +28,7 @@ public sealed class GetChatSessionQuery(AppDbContext dbContext)
             session.UpdatedAt,
             session.Messages
                 .OrderBy(message => message.CreatedAt)
+                .ThenBy(message => message.Role == "user" ? 0 : 1)
                 .Select(message => new ChatMessageResponse(
                     message.Id,
                     message.Role,

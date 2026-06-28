@@ -122,7 +122,8 @@ public sealed class AskQuestionCommand(
         IReadOnlyList<AskQuestionSource> sources,
         CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var userMessageCreatedAt = DateTimeOffset.UtcNow;
+        var assistantMessageCreatedAt = userMessageCreatedAt.AddMilliseconds(1);
 
         dbContext.ChatMessages.Add(new ChatMessage
         {
@@ -130,7 +131,7 @@ public sealed class AskQuestionCommand(
             ChatSessionId = session.Id,
             Role = "user",
             Content = question,
-            CreatedAt = now
+            CreatedAt = userMessageCreatedAt
         });
 
         dbContext.ChatMessages.Add(new ChatMessage
@@ -140,11 +141,11 @@ public sealed class AskQuestionCommand(
             Role = "assistant",
             Content = answer,
             SourcesJson = JsonSerializer.Serialize(sources),
-            CreatedAt = now
+            CreatedAt = assistantMessageCreatedAt
         });
 
         session.Title ??= BuildSessionTitle(question);
-        session.UpdatedAt = now;
+        session.UpdatedAt = assistantMessageCreatedAt;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
