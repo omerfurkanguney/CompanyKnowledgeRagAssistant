@@ -38,35 +38,55 @@ public sealed class GetHomeSummaryQuery(AppDbContext dbContext)
                 document.CreatedAt))
             .ToListAsync(cancellationToken);
 
-        var departmentDocumentCounts = await dbContext.Documents
+        var departmentNamesById = await dbContext.Departments
+            .AsNoTracking()
+            .ToDictionaryAsync(department => department.Id, department => department.Name, cancellationToken);
+
+        var categoryNamesById = await dbContext.DocumentCategories
+            .AsNoTracking()
+            .ToDictionaryAsync(category => category.Id, category => category.Name, cancellationToken);
+
+        var departmentCounts = await dbContext.Documents
             .AsNoTracking()
             .Where(document => document.Status != DocumentStatus.Deleted)
-            .GroupBy(document => new
+            .GroupBy(document => document.DepartmentId)
+            .Select(group => new
             {
-                document.DepartmentId,
-                DepartmentName = document.Department == null ? "Departmansız" : document.Department.Name
+                DepartmentId = group.Key,
+                DocumentCount = group.Count()
             })
-            .Select(group => new DepartmentDocumentCountResponse(
-                group.Key.DepartmentId,
-                group.Key.DepartmentName,
-                group.Count()))
             .OrderByDescending(item => item.DocumentCount)
             .ToListAsync(cancellationToken);
 
-        var categoryDocumentCounts = await dbContext.Documents
+        var departmentDocumentCounts = departmentCounts
+            .Select(item => new DepartmentDocumentCountResponse(
+                item.DepartmentId,
+                item.DepartmentId.HasValue && departmentNamesById.TryGetValue(item.DepartmentId.Value, out var departmentName)
+                    ? departmentName
+                    : "Departmansız",
+                item.DocumentCount))
+            .ToList();
+
+        var categoryCounts = await dbContext.Documents
             .AsNoTracking()
             .Where(document => document.Status != DocumentStatus.Deleted)
-            .GroupBy(document => new
+            .GroupBy(document => document.CategoryId)
+            .Select(group => new
             {
-                document.CategoryId,
-                CategoryName = document.Category == null ? "Kategorisiz" : document.Category.Name
+                CategoryId = group.Key,
+                DocumentCount = group.Count()
             })
-            .Select(group => new CategoryDocumentCountResponse(
-                group.Key.CategoryId,
-                group.Key.CategoryName,
-                group.Count()))
             .OrderByDescending(item => item.DocumentCount)
             .ToListAsync(cancellationToken);
+
+        var categoryDocumentCounts = categoryCounts
+            .Select(item => new CategoryDocumentCountResponse(
+                item.CategoryId,
+                item.CategoryId.HasValue && categoryNamesById.TryGetValue(item.CategoryId.Value, out var categoryName)
+                    ? categoryName
+                    : "Kategorisiz",
+                item.DocumentCount))
+            .ToList();
 
         return new GetHomeSummaryResponse(
             TotalDocumentCount: totalDocumentCount,
