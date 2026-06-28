@@ -24,7 +24,6 @@ export class AppShellComponent {
     { label: 'Dokümanlar', icon: 'description', route: '/documents' },
     { label: 'Sohbet', icon: 'chat_bubble', route: '/chat' },
     { label: 'Kaynaklar', icon: 'storage', route: '/sources' },
-    { label: 'Kullanıcılar', icon: 'groups', route: '/system' },
     { label: 'Ayarlar', icon: 'settings', route: '/system' },
   ];
 

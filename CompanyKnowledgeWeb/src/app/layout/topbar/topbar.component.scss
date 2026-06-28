@@ -47,64 +47,12 @@
   box-shadow: 0 10px 18px rgba(21, 94, 239, 0.24);
 }
 
-.notification-button {
-  position: relative;
-}
-
-.notification-button span {
-  position: absolute;
-  top: 4px;
-  right: 2px;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #155eef;
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.user-card {
-  display: grid;
-  grid-template-columns: 44px 1fr 18px;
-  gap: 10px;
-  align-items: center;
-  min-width: 210px;
-}
-
-.user-card strong {
-  display: block;
-  color: #111827;
-  font-size: 14px;
-}
-
-.user-card span {
-  display: block;
-  margin-top: 3px;
-  color: #667085;
-  font-size: 12px;
-}
-
-.avatar {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  color: #ffffff;
-  background: linear-gradient(135deg, #344054, #98a2b3);
-  font-weight: 800;
-}
-
 @media (max-width: 1100px) {
   .topbar-search {
     width: 44vw;
   }
 
-  .topbar-search kbd,
-  .user-card div {
+  .topbar-search kbd {
     display: none;
   }
 }
