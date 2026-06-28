@@ -27,6 +27,8 @@ services:
       AI__MaxOutputTokens: 256
     ports:
       - "8080:8080"
+    volumes:
+      - api_document_storage:/app/storage
     depends_on:
       - postgres
       - ollama
@@ -54,3 +56,4 @@ services:
 volumes:
   postgres_data:
   ollama_data:
+  api_document_storage:

@@ -251,7 +251,7 @@ export class DocumentsPage implements OnInit {
   }
 
   canEmbed(document: DocumentItem): boolean {
-    return document.status === 'Processed' || document.status === 'Failed';
+    return document.status === 'Processed' || (document.status === 'Failed' && document.chunkCount > 0);
   }
 
   private runDocumentAction<T>(documentId: string, action: () => Observable<T>, successMessage: string): void {

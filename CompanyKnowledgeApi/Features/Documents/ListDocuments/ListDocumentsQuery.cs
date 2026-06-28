@@ -24,6 +24,8 @@ public sealed class ListDocumentsQuery(AppDbContext dbContext)
                 document.CategoryId,
                 document.Category == null ? null : document.Category.Name,
                 document.Status.ToString(),
+                document.Chunks.Count,
+                document.FailureReason,
                 document.CreatedAt,
                 document.UpdatedAt))
             .ToListAsync(cancellationToken);

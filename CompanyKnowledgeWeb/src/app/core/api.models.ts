@@ -28,6 +28,8 @@ export interface DocumentItem {
   categoryId: string | null;
   categoryName: string | null;
   status: string;
+  chunkCount: number;
+  failureReason: string | null;
   createdAt: string;
   updatedAt: string | null;
 }

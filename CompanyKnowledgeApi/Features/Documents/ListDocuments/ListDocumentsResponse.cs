@@ -10,5 +10,7 @@ public sealed record ListDocumentsResponse(
     Guid? CategoryId,
     string? CategoryName,
     string Status,
+    int ChunkCount,
+    string? FailureReason,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt);

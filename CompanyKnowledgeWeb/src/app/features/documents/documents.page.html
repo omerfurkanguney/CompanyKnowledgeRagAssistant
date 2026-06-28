@@ -170,6 +170,10 @@
             <dd>{{ document.createdAt | date:'dd.MM.yyyy HH:mm' }}</dd>
             <dt>Durum</dt>
             <dd>{{ statusLabel(document.status) }} · {{ statusHint(document.status) }}</dd>
+            @if (document.failureReason) {
+              <dt>Hata Sebebi</dt>
+              <dd>{{ document.failureReason }}</dd>
+            }
           </dl>
         } @else {
           <p class="muted">Ayrıntı için doküman seç.</p>
@@ -182,6 +186,8 @@
           <dl>
             <dt>Metin İşleme</dt>
             <dd>{{ document.status === 'Processed' || document.status === 'Indexed' ? 'Tamamlandı' : 'Bekliyor' }}</dd>
+            <dt>Chunk Sayısı</dt>
+            <dd>{{ document.chunkCount }}</dd>
             <dt>Embedding</dt>
             <dd>{{ document.status === 'Indexed' ? 'Hazır' : 'Bekliyor' }}</dd>
             <dt>Son Güncelleme</dt>
