@@ -20,14 +20,28 @@ interface ReleaseNote {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReleaseNotesPage {
-  protected readonly currentVersion = 'v0.2.0';
+  protected readonly currentVersion = 'v0.2.5';
 
   protected readonly notes: ReleaseNote[] = [
+    {
+      version: 'v0.2.5',
+      date: 'Haziran 2026',
+      title: 'Sohbet ve doküman deneyimi iyileştirildi',
+      status: 'Mevcut sürüm',
+      highlights: [
+        'Sohbet geçmişindeki konuşmalar silinebilir hale getirildi.',
+        'Sohbet geçmişi Bugün, Bu Hafta ve Tümü seçenekleriyle filtrelenebilir hale getirildi.',
+        'Yüklenen dokümanları Dokümanlar ekranından tekrar indirme desteği eklendi.',
+        'Önerilen sorular politika seçimine göre değişecek şekilde düzenlendi.',
+        'Sohbet cevap kaynaklarında varsa madde ve sayfa aralığı gösterimi eklendi.',
+      ],
+      tags: ['Chat History', 'Documents', 'Sources', 'UX'],
+    },
     {
       version: 'v0.2.0',
       date: 'Haziran 2026',
       title: 'Sohbet geçmişi eklendi',
-      status: 'Mevcut sürüm',
+      status: 'Tamamlandı',
       highlights: [
         'Sohbet oturumları veritabanında kalıcı hale getirildi.',
         'Aynı sohbet içindeki kullanıcı soruları ve asistan cevapları alt alta gösterilecek şekilde düzenlendi.',
