@@ -28,8 +28,10 @@ export class ApiService {
     return this.http.post<AskQuestionResponse>(`${this.apiUrl}/chat/ask`, request);
   }
 
-  listChatSessions(): Observable<ChatSessionSummary[]> {
-    return this.http.get<ChatSessionSummary[]>(`${this.apiUrl}/chat/sessions`);
+  listChatSessions(period: 'today' | 'week' | 'all' = 'all'): Observable<ChatSessionSummary[]> {
+    return this.http.get<ChatSessionSummary[]>(`${this.apiUrl}/chat/sessions`, {
+      params: { period },
+    });
   }
 
   getChatSession(sessionId: string): Observable<ChatSessionDetail> {
@@ -76,6 +78,10 @@ export class ApiService {
 
   deleteDocument(documentId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/documents/${documentId}`);
+  }
+
+  getDocumentDownloadUrl(documentId: string): string {
+    return `${this.apiUrl}/documents/${documentId}/download`;
   }
 
   getApiInfo(): Observable<ApiInfo> {

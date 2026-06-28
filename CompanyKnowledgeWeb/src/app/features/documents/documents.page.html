@@ -127,6 +127,9 @@
                 <button mat-icon-button type="button" title="Embed" (click)="embed(document)" [disabled]="workingDocumentId() === document.id || !canEmbed(document)">
                   <mat-icon>hub</mat-icon>
                 </button>
+                <button mat-icon-button type="button" title="İndir" (click)="download(document)" [disabled]="workingDocumentId() === document.id">
+                  <mat-icon>download</mat-icon>
+                </button>
                 <button mat-icon-button type="button" title="Sil" (click)="delete(document)" [disabled]="workingDocumentId() === document.id">
                   <mat-icon>delete</mat-icon>
                 </button>
@@ -207,6 +210,11 @@
           <button type="button" [disabled]="!canEmbed(document)" (click)="embed(document)">
             <mat-icon>hub</mat-icon>
             Embed Et
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button type="button" (click)="download(document)">
+            <mat-icon>download</mat-icon>
+            İndir
             <mat-icon>chevron_right</mat-icon>
           </button>
           <button type="button" class="danger" (click)="delete(document)">

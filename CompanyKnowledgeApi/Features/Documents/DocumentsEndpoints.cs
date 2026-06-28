@@ -1,4 +1,5 @@
 using CompanyKnowledgeApi.Features.Documents.DeleteDocument;
+using CompanyKnowledgeApi.Features.Documents.DownloadDocument;
 using CompanyKnowledgeApi.Features.Documents.GetDocumentStatus;
 using CompanyKnowledgeApi.Features.Documents.ListDocuments;
 using CompanyKnowledgeApi.Features.Documents.UploadDocument;
@@ -15,6 +16,7 @@ public static class DocumentsEndpoints
         group.MapUploadDocumentEndpoint();
         group.MapListDocumentsEndpoint();
         group.MapGetDocumentStatusEndpoint();
+        group.MapDownloadDocumentEndpoint();
         group.MapDeleteDocumentEndpoint();
 
         return app;

@@ -5,12 +5,24 @@ using Microsoft.EntityFrameworkCore;
 namespace CompanyKnowledgeApi.Features.Chat.ListChatSessions;
 
 public sealed class ListChatSessionsQuery(AppDbContext dbContext)
-    : IQuery<IReadOnlyList<ChatSessionSummaryResponse>>, IScopedService
+    : IQuery<ListChatSessionsModel, IReadOnlyList<ChatSessionSummaryResponse>>, IScopedService
 {
-    public async Task<IReadOnlyList<ChatSessionSummaryResponse>> Handle(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ChatSessionSummaryResponse>> Handle(
+        ListChatSessionsModel model,
+        CancellationToken cancellationToken)
     {
-        return await dbContext.ChatSessions
+        var query = dbContext.ChatSessions
             .AsNoTracking()
+            .AsQueryable();
+
+        query = model.Period switch
+        {
+            ListChatSessionsPeriod.Today => query.Where(session => session.UpdatedAt >= DateTimeOffset.UtcNow.Date),
+            ListChatSessionsPeriod.Week => query.Where(session => session.UpdatedAt >= DateTimeOffset.UtcNow.AddDays(-7)),
+            _ => query
+        };
+
+        return await query
             .OrderByDescending(session => session.UpdatedAt)
             .Select(session => new ChatSessionSummaryResponse(
                 session.Id,

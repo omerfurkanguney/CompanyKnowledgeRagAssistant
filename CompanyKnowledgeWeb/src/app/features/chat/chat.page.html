@@ -9,9 +9,9 @@
     </div>
 
     <div class="history-tabs">
-      <button type="button" class="active">Bugün</button>
-      <button type="button">Bu Hafta</button>
-      <button type="button">Tümü</button>
+      <button type="button" [class.active]="selectedHistoryPeriod() === 'today'" (click)="changeHistoryPeriod('today')">Bugün</button>
+      <button type="button" [class.active]="selectedHistoryPeriod() === 'week'" (click)="changeHistoryPeriod('week')">Bu Hafta</button>
+      <button type="button" [class.active]="selectedHistoryPeriod() === 'all'" (click)="changeHistoryPeriod('all')">Tümü</button>
     </div>
 
     <div class="history-list">

@@ -18,6 +18,8 @@ interface SuggestedQuestionTopic {
   questions: string[];
 }
 
+type ChatHistoryPeriod = 'today' | 'week' | 'all';
+
 @Component({
   selector: 'app-chat-page',
   imports: [
@@ -50,6 +52,7 @@ export class ChatPage implements OnInit {
   protected readonly chatSessions = signal<ChatSessionSummary[]>([]);
   protected readonly currentSessionId = signal<string | null>(null);
   protected readonly currentMessages = signal<ChatMessage[]>([]);
+  protected readonly selectedHistoryPeriod = signal<ChatHistoryPeriod>('today');
   protected readonly selectedQuestionTopic = signal('annualLeave');
   protected readonly now = new Date();
   protected readonly activeSessionTitle = computed(() =>
@@ -164,12 +167,20 @@ export class ChatPage implements OnInit {
   loadChatSessions(): void {
     this.loadingSessions.set(true);
     this.api
-      .listChatSessions()
+      .listChatSessions(this.selectedHistoryPeriod())
       .pipe(finalize(() => this.loadingSessions.set(false)))
       .subscribe({
         next: (sessions) => this.chatSessions.set(sessions),
         error: () => this.snackBar.open('Sohbet geçmişi alınamadı.', 'Kapat', { duration: 4000 }),
       });
+  }
+
+  changeHistoryPeriod(period: ChatHistoryPeriod): void {
+    this.selectedHistoryPeriod.set(period);
+    this.currentSessionId.set(null);
+    this.currentMessages.set([]);
+    this.response.set(null);
+    this.loadChatSessions();
   }
 
   newChat(): void {

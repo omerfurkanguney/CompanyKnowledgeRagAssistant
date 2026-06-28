@@ -178,6 +178,16 @@ export class DocumentsPage implements OnInit {
     this.runDocumentAction(document.id, () => this.api.deleteDocument(document.id), 'Doküman silindi.');
   }
 
+  download(document: DocumentItem): void {
+    const link = window.document.createElement('a');
+    link.href = this.api.getDocumentDownloadUrl(document.id);
+    link.download = document.fileName;
+    link.rel = 'noopener';
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   formatSize(sizeInBytes: number): string {
     if (sizeInBytes < 1024 * 1024) {
       return `${Math.round(sizeInBytes / 1024)} KB`;
