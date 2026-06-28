@@ -49,6 +49,7 @@ export class ChatPage implements OnInit {
   protected readonly loading = signal(false);
   protected readonly loadingSessions = signal(false);
   protected readonly response = signal<AskQuestionResponse | null>(null);
+  protected readonly lastResponseDurationMs = signal<number | null>(null);
   protected readonly chatSessions = signal<ChatSessionSummary[]>([]);
   protected readonly currentSessionId = signal<string | null>(null);
   protected readonly currentMessages = signal<ChatMessage[]>([]);
@@ -180,6 +181,7 @@ export class ChatPage implements OnInit {
     this.currentSessionId.set(null);
     this.currentMessages.set([]);
     this.response.set(null);
+    this.lastResponseDurationMs.set(null);
     this.loadChatSessions();
   }
 
@@ -187,6 +189,7 @@ export class ChatPage implements OnInit {
     this.currentSessionId.set(null);
     this.currentMessages.set([]);
     this.response.set(null);
+    this.lastResponseDurationMs.set(null);
     this.question.setValue('');
   }
 
@@ -197,6 +200,7 @@ export class ChatPage implements OnInit {
         const messages = this.sortMessages(detail.messages);
         this.currentMessages.set(messages);
         this.restoreLastExchange(messages);
+        this.lastResponseDurationMs.set(null);
       },
       error: () => this.snackBar.open('Sohbet detayı alınamadı.', 'Kapat', { duration: 4000 }),
     });
@@ -235,7 +239,9 @@ export class ChatPage implements OnInit {
     this.currentMessages.set([...this.currentMessages(), userMessage]);
     this.loading.set(true);
     this.response.set(null);
+    this.lastResponseDurationMs.set(null);
     this.question.setValue('');
+    const startedAt = performance.now();
 
     this.api
       .askQuestion({
@@ -246,6 +252,7 @@ export class ChatPage implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => {
+          this.lastResponseDurationMs.set(performance.now() - startedAt);
           const assistantMessage: ChatMessage = {
             id: crypto.randomUUID(),
             role: 'assistant',
@@ -283,6 +290,20 @@ export class ChatPage implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  responseDurationLabel(): string {
+    const durationMs = this.lastResponseDurationMs();
+
+    if (durationMs === null) {
+      return '-';
+    }
+
+    if (durationMs < 1000) {
+      return `${Math.round(durationMs)} ms`;
+    }
+
+    return `${(durationMs / 1000).toFixed(2)} sn`;
   }
 
   sourceLocation(source: AskQuestionSource): string {
