@@ -1,57 +1,70 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { forkJoin, finalize } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { ApiService } from '../../core/api.service';
-import { ApiInfo, SystemHealth } from '../../core/api.models';
+
+interface SettingsCard {
+  icon: string;
+  title: string;
+  description: string;
+  items: Array<{
+    label: string;
+    value: string;
+  }>;
+}
 
 @Component({
   selector: 'app-system-page',
   imports: [
-    DatePipe,
-    MatButtonModule,
     MatIconModule,
-    MatProgressBarModule,
-    MatSnackBarModule,
   ],
   templateUrl: './system.page.html',
   styleUrl: './system.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SystemPage implements OnInit {
-  private readonly api = inject(ApiService);
-  private readonly snackBar = inject(MatSnackBar);
-
-  protected readonly apiBaseUrl = environment.apiBaseUrl;
-  protected readonly loading = signal(false);
-  protected readonly info = signal<ApiInfo | null>(null);
-  protected readonly health = signal<SystemHealth | null>(null);
-  protected readonly rootHealth = signal<string | null>(null);
-
-  ngOnInit(): void {
-    this.refresh();
-  }
-
-  refresh(): void {
-    this.loading.set(true);
-
-    forkJoin({
-      info: this.api.getApiInfo(),
-      health: this.api.getSystemHealth(),
-      rootHealth: this.api.getHealth(),
-    })
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (result) => {
-          this.info.set(result.info);
-          this.health.set(result.health);
-          this.rootHealth.set(result.rootHealth);
-        },
-        error: () => this.snackBar.open('Sistem bilgileri alınamadı.', 'Kapat', { duration: 4000 }),
-      });
-  }
+export class SystemPage {
+  protected readonly settingsCards: SettingsCard[] = [
+    {
+      icon: 'psychology',
+      title: 'AI Yapılandırması',
+      description: 'Yanıt üretimi ve embedding işlemleri lokal Ollama üzerinden çalışır.',
+      items: [
+        { label: 'Sağlayıcı', value: 'Ollama' },
+        { label: 'Chat modeli', value: 'qwen2.5:1.5b' },
+        { label: 'Embedding modeli', value: 'bge-m3' },
+        { label: 'Çalışma modu', value: 'Lokal / self-hosted' },
+      ],
+    },
+    {
+      icon: 'article',
+      title: 'Doküman İşleme',
+      description: 'PDF ve DOCX dosyaları metne çevrilir, chunklara ayrılır ve RAG için hazırlanır.',
+      items: [
+        { label: 'Desteklenen dosyalar', value: 'PDF, DOCX' },
+        { label: 'Chunking', value: 'Clause-aware semantic chunking' },
+        { label: 'Sayfa metadata', value: 'Aktif' },
+        { label: 'Maksimum dosya', value: '25 MB' },
+      ],
+    },
+    {
+      icon: 'storage',
+      title: 'Veritabanı ve Arama',
+      description: 'Doküman, chunk, embedding ve sohbet geçmişi PostgreSQL üzerinde saklanır.',
+      items: [
+        { label: 'Veritabanı', value: 'PostgreSQL' },
+        { label: 'Vektör arama', value: 'pgvector' },
+        { label: 'Semantic search', value: 'Aktif' },
+        { label: 'Sohbet geçmişi', value: 'Kalıcı' },
+      ],
+    },
+    {
+      icon: 'lock_open',
+      title: 'Demo Modu',
+      description: 'Bu MVP açık kaynak ve CV demosu için auth olmadan çalışacak şekilde tasarlandı.',
+      items: [
+        { label: 'Kimlik doğrulama', value: 'Kapalı' },
+        { label: 'Kullanıcı yönetimi', value: 'Kapalı' },
+        { label: 'Deployment', value: 'Local veya sunucu' },
+        { label: 'Kullanım amacı', value: 'RAG demo' },
+      ],
+    },
+  ];
 }
