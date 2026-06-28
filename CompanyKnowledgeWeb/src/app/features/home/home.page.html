@@ -75,40 +75,19 @@
     </aside>
 
     <main class="surface preview-chat">
-      <div class="today-label">Bugün</div>
-      <div class="message user-message">
-        <p>Yıllık izin kaç gün önceden talep edilir?</p>
-        <span>10:24 ✓✓</span>
-      </div>
-      <div class="assistant-row">
-        <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>
-        <div class="message assistant-message">
-          <p>Yıllık izin talepleri, planlanan başlangıç tarihinden en az 10 iş günü öncesinden yöneticinize iletilmelidir.</p>
-          <p>Detaylı bilgi için yıllık izin politikası dokümanının 5. bölümünü inceleyebilirsiniz.</p>
-          <span>10:24</span>
-          <div class="message-actions">
-            <button mat-stroked-button type="button">
-              <mat-icon>picture_as_pdf</mat-icon>
-              01-yillik-izin-politikasi.pdf
-              <mat-icon>open_in_new</mat-icon>
-            </button>
-            <button mat-stroked-button type="button">
-              <mat-icon>menu_book</mat-icon>
-              Bölüm 5
-              <mat-icon>open_in_new</mat-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="feedback-row">
-        <span>Bu yanıtı beğendiniz mi?</span>
-        <button mat-icon-button type="button"><mat-icon>thumb_up</mat-icon></button>
-        <button mat-icon-button type="button"><mat-icon>thumb_down</mat-icon></button>
+      <div class="empty-chat-preview">
+        <mat-icon>forum</mat-icon>
+        <strong>Yeni Sohbet</strong>
+        <span>Yeni bir soru sorarak sohbete başlayın.</span>
+        <span>Yanıtlar ve geçmiş aynı sohbet altında saklanır.</span>
       </div>
       <div class="ask-box">
         <span>Şirket politikaları hakkında soru sor...</span>
         <mat-icon>attach_file</mat-icon>
-        <button mat-flat-button type="button"><mat-icon>send</mat-icon></button>
+        <a mat-flat-button routerLink="/chat" class="chat-link-button" aria-label="Sohbet ekranına git">
+          <span>Sohbete Git</span>
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
       </div>
     </main>
 

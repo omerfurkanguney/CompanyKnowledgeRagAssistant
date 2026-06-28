@@ -23,7 +23,6 @@ export class AppShellComponent {
     { label: 'Genel Bakış', icon: 'home', route: '/home' },
     { label: 'Dokümanlar', icon: 'description', route: '/documents' },
     { label: 'Sohbet', icon: 'chat_bubble', route: '/chat' },
-    { label: 'Kaynaklar', icon: 'storage', route: '/sources' },
     { label: 'Güncelleme Notları', icon: 'new_releases', route: '/release-notes' },
     { label: 'Ayarlar', icon: 'settings', route: '/system' },
   ];

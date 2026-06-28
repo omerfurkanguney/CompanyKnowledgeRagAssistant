@@ -319,10 +319,9 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
+  grid-template-columns: 1fr;
+  gap: 0;
   margin-top: 12px;
-  background: #e5eaf2;
 }
 
 .summary-grid div {

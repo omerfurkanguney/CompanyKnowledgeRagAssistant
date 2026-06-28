@@ -35,7 +35,7 @@ export class ReleaseNotesPage {
         'Önerilen sorular politika seçimine göre değişecek şekilde düzenlendi.',
         'Sohbet cevap kaynaklarında varsa madde ve sayfa aralığı gösterimi eklendi.',
       ],
-      tags: ['Chat History', 'Documents', 'Sources', 'UX'],
+      tags: ['Chat History', 'Documents', 'Source Metadata', 'UX'],
     },
     {
       version: 'v0.2.0',
@@ -59,7 +59,7 @@ export class ReleaseNotesPage {
         'Doküman yükleme, metin işleme, chunk üretimi ve embedding akışı eklendi.',
         'PostgreSQL + pgvector ile semantic search ve RAG cevap üretimi bağlandı.',
         'Ollama tabanlı lokal embedding ve chat modeli desteği hazırlandı.',
-        'Angular arayüzünde Home, Dokümanlar, Sohbet, Kaynaklar ve Ayarlar ekranları oluşturuldu.',
+        'Angular arayüzünde Home, Dokümanlar, Sohbet ve Ayarlar ekranları oluşturuldu.',
       ],
       tags: ['.NET 10', 'Angular 22', 'PostgreSQL', 'pgvector', 'Ollama'],
     },
