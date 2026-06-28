@@ -141,6 +141,28 @@
   overflow-y: auto;
 }
 
+.empty-conversation {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  min-height: 320px;
+  color: #667085;
+  text-align: center;
+}
+
+.empty-conversation mat-icon {
+  width: 44px;
+  height: 44px;
+  color: #155eef;
+  font-size: 44px;
+}
+
+.empty-conversation strong {
+  color: #111827;
+  font-size: 16px;
+}
+
 .message {
   max-width: 68%;
   padding: 14px 16px;

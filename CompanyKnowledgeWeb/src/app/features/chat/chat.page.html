@@ -36,51 +36,62 @@
     </header>
 
     <div class="conversation-body">
-      @if (lastQuestion()) {
-      <div class="message user-message">
-        <p>{{ lastQuestion() }}</p>
-        <span>{{ now | date:'HH:mm' }} ✓✓</span>
-      </div>
+      @if (currentMessages().length === 0 && !loading()) {
+        <div class="empty-conversation">
+          <mat-icon>forum</mat-icon>
+          <strong>Yeni bir soru sorarak sohbete başlayın.</strong>
+          <span>Yanıtlar ve geçmiş aynı sohbet altında saklanır.</span>
+        </div>
       }
 
-      <div class="assistant-row">
-        <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>
-        <div class="message assistant-message">
-          @if (loading()) {
+      @for (message of currentMessages(); track message.id) {
+        @if (message.role === 'user') {
+          <div class="message user-message">
+            <p>{{ message.content }}</p>
+            <span>{{ messageTime(message.createdAt) }} ✓✓</span>
+          </div>
+        } @else {
+          <div class="assistant-row">
+            <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>
+            <div class="message assistant-message">
+              @for (line of messageLines(message.content); track $index) {
+                <p>{{ line }}</p>
+              }
+              @if (message.sources.length > 0) {
+                <div class="message-actions">
+                  <button mat-stroked-button type="button">
+                    <mat-icon>picture_as_pdf</mat-icon>
+                    {{ message.sources[0].documentName }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                  <button mat-stroked-button type="button">
+                    <mat-icon>menu_book</mat-icon>
+                    Bölüm {{ message.sources[0].chunkIndex }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="feedback-row">
+            <span>Bu yanıt faydalı mı?</span>
+            <button mat-icon-button type="button"><mat-icon>thumb_up</mat-icon></button>
+            <button mat-icon-button type="button"><mat-icon>thumb_down</mat-icon></button>
+          </div>
+        }
+      }
+
+      @if (loading()) {
+        <div class="assistant-row">
+          <span class="assistant-avatar"><mat-icon>auto_awesome</mat-icon></span>
+          <div class="message assistant-message">
             <div class="loading-line">
               <mat-spinner diameter="22" />
               <span>Cevap üretiliyor...</span>
             </div>
-          } @else {
-            @for (line of answerLines(); track $index) {
-              <p>{{ line }}</p>
-            }
-            <div class="message-actions">
-              <button mat-stroked-button type="button">
-                <mat-icon>picture_as_pdf</mat-icon>
-                {{ response()?.sources?.[0]?.documentName ?? '01-yillik-izin-politikasi.pdf' }}
-                <mat-icon>open_in_new</mat-icon>
-              </button>
-              <button mat-stroked-button type="button">
-                <mat-icon>menu_book</mat-icon>
-                Bölüm {{ response()?.sources?.[0]?.chunkIndex ?? 5 }}
-                <mat-icon>open_in_new</mat-icon>
-              </button>
-              <button mat-stroked-button type="button">
-                <mat-icon>help_outline</mat-icon>
-                SSS
-                <mat-icon>open_in_new</mat-icon>
-              </button>
-            </div>
-          }
+          </div>
         </div>
-      </div>
-
-      <div class="feedback-row">
-        <span>Bu yanıt faydalı mı?</span>
-        <button mat-icon-button type="button"><mat-icon>thumb_up</mat-icon></button>
-        <button mat-icon-button type="button"><mat-icon>thumb_down</mat-icon></button>
-      </div>
+      }
     </div>
 
     <footer class="composer">

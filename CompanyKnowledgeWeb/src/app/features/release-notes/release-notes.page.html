@@ -1,0 +1,73 @@
+<section class="release-notes-page">
+  <header class="release-header surface">
+    <div>
+      <span class="eyebrow">Açık kaynak demo</span>
+      <h1>Güncelleme Notları</h1>
+      <p>Company Knowledge RAG Assistant için sürüm geçmişi, tamamlanan işler ve teknik kilometre taşları.</p>
+    </div>
+    <div class="version-badge">
+      <mat-icon>verified</mat-icon>
+      <span>Güncel Sürüm</span>
+      <strong>{{ currentVersion }}</strong>
+    </div>
+  </header>
+
+  <section class="release-layout">
+    <aside class="surface release-summary">
+      <h2>Özet</h2>
+      <div class="summary-item">
+        <span>Backend</span>
+        <strong>.NET 10 Vertical Slice</strong>
+      </div>
+      <div class="summary-item">
+        <span>Frontend</span>
+        <strong>Angular 22 + Material</strong>
+      </div>
+      <div class="summary-item">
+        <span>Veritabanı</span>
+        <strong>PostgreSQL + pgvector</strong>
+      </div>
+      <div class="summary-item">
+        <span>AI Runtime</span>
+        <strong>Ollama lokal model desteği</strong>
+      </div>
+    </aside>
+
+    <main class="release-timeline">
+      @for (note of notes; track note.version) {
+        <article class="surface release-card">
+          <div class="release-marker">
+            <span></span>
+          </div>
+          <div class="release-content">
+            <div class="release-card-header">
+              <div>
+                <span class="release-version">{{ note.version }}</span>
+                <h2>{{ note.title }}</h2>
+              </div>
+              <div class="release-meta">
+                <span>{{ note.date }}</span>
+                <strong>{{ note.status }}</strong>
+              </div>
+            </div>
+
+            <ul>
+              @for (item of note.highlights; track item) {
+                <li>
+                  <mat-icon>check_circle</mat-icon>
+                  <span>{{ item }}</span>
+                </li>
+              }
+            </ul>
+
+            <div class="tag-list">
+              @for (tag of note.tags; track tag) {
+                <span>{{ tag }}</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </main>
+  </section>
+</section>

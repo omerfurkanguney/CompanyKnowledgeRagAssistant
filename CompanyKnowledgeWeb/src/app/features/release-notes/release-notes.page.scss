@@ -1,0 +1,227 @@
+.release-notes-page {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.release-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 24px;
+  align-items: center;
+  padding: 22px 24px;
+}
+
+.eyebrow {
+  color: #155eef;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.release-header h1 {
+  margin: 6px 0 8px;
+  color: #111827;
+  font-size: 28px;
+}
+
+.release-header p {
+  max-width: 720px;
+  margin: 0;
+  color: #667085;
+}
+
+.version-badge {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #155eef;
+}
+
+.version-badge mat-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+}
+
+.version-badge span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.version-badge strong {
+  color: #111827;
+  font-size: 24px;
+}
+
+.release-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.release-summary {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.release-summary h2 {
+  margin: 0 0 4px;
+  color: #111827;
+  font-size: 18px;
+}
+
+.summary-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.summary-item span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.summary-item strong {
+  color: #111827;
+  font-size: 14px;
+}
+
+.release-timeline {
+  display: grid;
+  gap: 14px;
+}
+
+.release-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px;
+}
+
+.release-marker {
+  display: flex;
+  justify-content: center;
+}
+
+.release-marker span {
+  width: 14px;
+  height: 14px;
+  margin-top: 8px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #155eef;
+  box-shadow: 0 0 0 3px #bfdbfe;
+}
+
+.release-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.release-version {
+  color: #155eef;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.release-card h2 {
+  margin: 4px 0 0;
+  color: #111827;
+  font-size: 20px;
+}
+
+.release-meta {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  color: #667085;
+  font-size: 13px;
+}
+
+.release-meta strong {
+  color: #079455;
+}
+
+.release-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.release-card li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  color: #344054;
+}
+
+.release-card li mat-icon {
+  color: #079455;
+  font-size: 20px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-list span {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #eff5ff;
+  color: #155eef;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 980px) {
+  .release-header,
+  .release-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .version-badge {
+    justify-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .release-header,
+  .release-card,
+  .release-summary {
+    padding: 14px;
+  }
+
+  .release-card {
+    grid-template-columns: 1fr;
+  }
+
+  .release-marker {
+    display: none;
+  }
+
+  .release-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .release-meta {
+    justify-items: start;
+  }
+}

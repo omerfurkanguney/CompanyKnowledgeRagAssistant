@@ -40,14 +40,9 @@ export class ChatPage implements OnInit {
   protected readonly chatSessions = signal<ChatSessionSummary[]>([]);
   protected readonly currentSessionId = signal<string | null>(null);
   protected readonly currentMessages = signal<ChatMessage[]>([]);
-  protected readonly lastQuestion = signal('Yıllık izin kaç gün önceden talep edilmelidir?');
   protected readonly now = new Date();
   protected readonly activeSessionTitle = computed(() =>
     this.chatSessions().find((session) => session.id === this.currentSessionId())?.title ?? 'Yeni Sohbet');
-  protected readonly answerLines = computed(() => this.response()?.answer.split('\n') ?? [
-    'Yıllık izin talepleri, planlanan başlangıç tarihinden en az 10 iş günü öncesinden yöneticinize iletilmelidir.',
-    'Beş iş gününden kısa izin taleplerinde ise en az 5 iş günü önce başvuru yapılması yeterlidir.',
-  ]);
   protected readonly confidence = computed(() => {
     const sources = this.response()?.sources ?? [];
     if (sources.length === 0) {
@@ -87,7 +82,6 @@ export class ChatPage implements OnInit {
     this.currentSessionId.set(null);
     this.currentMessages.set([]);
     this.response.set(null);
-    this.lastQuestion.set('');
     this.question.setValue('');
   }
 
@@ -109,9 +103,18 @@ export class ChatPage implements OnInit {
     }
 
     const question = this.question.value.trim();
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: question,
+      sources: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    this.currentMessages.set([...this.currentMessages(), userMessage]);
     this.loading.set(true);
     this.response.set(null);
-    this.lastQuestion.set(question);
+    this.question.setValue('');
 
     this.api
       .askQuestion({
@@ -122,8 +125,17 @@ export class ChatPage implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (response) => {
+          const assistantMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: response.answer,
+            sources: response.sources,
+            createdAt: new Date().toISOString(),
+          };
+
           this.response.set(response);
           this.currentSessionId.set(response.sessionId);
+          this.currentMessages.set([...this.currentMessages(), assistantMessage]);
           this.loadChatSessions();
         },
         error: () => this.snackBar.open('Cevap alınamadı. API ve Ollama durumunu kontrol et.', 'Kapat', { duration: 5000 }),
@@ -141,11 +153,19 @@ export class ChatPage implements OnInit {
     });
   }
 
+  messageLines(content: string): string[] {
+    return content.split('\n').filter((line) => line.trim().length > 0);
+  }
+
+  messageTime(createdAt: string): string {
+    return new Date(createdAt).toLocaleTimeString('tr-TR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
   private restoreLastExchange(messages: ChatMessage[]): void {
     const lastAssistantMessage = [...messages].reverse().find((message) => message.role === 'assistant');
-    const lastUserMessage = [...messages].reverse().find((message) => message.role === 'user');
-
-    this.lastQuestion.set(lastUserMessage?.content ?? '');
 
     if (lastAssistantMessage) {
       this.response.set({
