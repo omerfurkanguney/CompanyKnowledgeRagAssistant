@@ -185,11 +185,11 @@
         @if (selectedDocument(); as document) {
           <dl>
             <dt>Metin İşleme</dt>
-            <dd>{{ document.status === 'Processed' || document.status === 'Indexed' ? 'Tamamlandı' : 'Bekliyor' }}</dd>
+            <dd>{{ document.status === 'Processing' ? 'Devam ediyor' : (document.status === 'Processed' || document.status === 'Indexed' ? 'Tamamlandı' : 'Bekliyor') }}</dd>
             <dt>Chunk Sayısı</dt>
             <dd>{{ document.chunkCount }}</dd>
             <dt>Embedding</dt>
-            <dd>{{ document.status === 'Indexed' ? 'Hazır' : 'Bekliyor' }}</dd>
+            <dd>{{ document.status === 'Embedding' ? 'Devam ediyor' : (document.status === 'Indexed' ? 'Hazır' : 'Bekliyor') }}</dd>
             <dt>Son Güncelleme</dt>
             <dd>{{ (document.updatedAt ?? document.createdAt) | date:'dd.MM.yyyy HH:mm' }}</dd>
           </dl>

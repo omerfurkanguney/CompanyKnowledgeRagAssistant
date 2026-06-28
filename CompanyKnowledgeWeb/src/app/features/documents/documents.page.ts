@@ -157,11 +157,21 @@ export class DocumentsPage implements OnInit {
   }
 
   process(document: DocumentItem): void {
-    this.runDocumentAction(document.id, () => this.api.processDocument(document.id), 'Doküman işlendi. Embedding için hazır.');
+    this.runDocumentAction(
+      document.id,
+      () => this.api.processDocument(document.id),
+      'Doküman işlendi. Embedding için hazır.',
+      'Processing',
+      'Metin işleme başlatıldı.');
   }
 
   embed(document: DocumentItem): void {
-    this.runDocumentAction(document.id, () => this.api.embedDocument(document.id), 'Embedding tamamlandı. Doküman arama için hazır.');
+    this.runDocumentAction(
+      document.id,
+      () => this.api.embedDocument(document.id),
+      'Embedding tamamlandı. Doküman arama için hazır.',
+      'Embedding',
+      'Embedding başlatıldı. Bu işlem biraz sürebilir.');
   }
 
   delete(document: DocumentItem): void {
@@ -254,8 +264,21 @@ export class DocumentsPage implements OnInit {
     return document.status === 'Processed' || (document.status === 'Failed' && document.chunkCount > 0);
   }
 
-  private runDocumentAction<T>(documentId: string, action: () => Observable<T>, successMessage: string): void {
+  private runDocumentAction<T>(
+    documentId: string,
+    action: () => Observable<T>,
+    successMessage: string,
+    optimisticStatus?: string,
+    pendingMessage?: string): void {
     this.workingDocumentId.set(documentId);
+
+    if (optimisticStatus) {
+      this.updateDocumentStatus(documentId, optimisticStatus);
+    }
+
+    if (pendingMessage) {
+      this.snackBar.open(pendingMessage, 'Kapat', { duration: 3000 });
+    }
 
     action()
       .pipe(finalize(() => this.workingDocumentId.set(null)))
@@ -264,7 +287,29 @@ export class DocumentsPage implements OnInit {
           this.snackBar.open(successMessage, 'Kapat', { duration: 3000 });
           this.loadDocuments();
         },
-        error: () => this.snackBar.open('İşlem başarısız.', 'Kapat', { duration: 4000 }),
+        error: () => {
+          this.snackBar.open('İşlem başarısız.', 'Kapat', { duration: 4000 });
+          this.loadDocuments();
+        },
       });
+  }
+
+  private updateDocumentStatus(documentId: string, status: string): void {
+    const updatedDocuments = this.documents().map((document) =>
+      document.id === documentId
+        ? {
+            ...document,
+            status,
+            failureReason: null,
+            updatedAt: new Date().toISOString(),
+          }
+        : document);
+
+    this.documents.set(updatedDocuments);
+
+    const selectedDocument = this.selectedDocument();
+    if (selectedDocument?.id === documentId) {
+      this.selectedDocument.set(updatedDocuments.find((document) => document.id === documentId) ?? selectedDocument);
+    }
   }
 }
