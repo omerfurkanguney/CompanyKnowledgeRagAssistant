@@ -33,8 +33,8 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 ## İçindekiler
 
 1. [Projenin Amacı](#projenin-amaci)
-2. [Öne Çıkan Özellikler](#one-cikan-ozellikler)
-3. [Mimari](#mimari)
+2. [Özellikler](#ozellikler)
+3. [Sistem Akışı](#sistem-akisi)
 4. [Backend Mimarisi](#backend-mimarisi)
 5. [RAG Akışı](#rag-akisi)
 6. [Kullanılan Teknolojiler](#kullanilan-teknolojiler)
@@ -53,9 +53,9 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 - LLM cevabını sadece bulunan kaynaklara dayalı şekilde üretmek.
 - Doküman işleme ve embedding işlemlerini arka plan job’larıyla yönetmek.
 
-<a id="one-cikan-ozellikler"></a>
+<a id="ozellikler"></a>
 
-## Öne Çıkan Özellikler
+## Özellikler
 
 - Doküman yükleme: PDF ve DOCX dosya desteği.
 - Metin çıkarma: PDF için PdfPig, DOCX için OpenXML.
@@ -71,44 +71,57 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 - Docker desteği: Web, API, PostgreSQL ve Ollama servisleri.
 - Production hazırlığı: GHCR image publish ve Ansible deployment akışı.
 
-<a id="mimari"></a>
+<a id="sistem-akisi"></a>
 
-## Mimari
+## Sistem Akışı
 
-Proje iki ana akış üzerine kuruludur: dokümanların RAG için hazırlanması ve kullanıcının sorusuna kaynaklı cevap üretilmesi.
+Proje iki temel akıştan oluşur: dokümanın RAG için hazırlanması ve kullanıcının sorusuna kaynaklı cevap üretilmesi.
 
-### Doküman Kayıt ve Hazırlama Süreci
-
-```mermaid
-flowchart LR
-    A[Doküman yükleme] --> B[API kontrolü]
-    B --> C[Local storage]
-    C --> D[(Document kaydı)]
-    D --> E[Hangfire process job]
-    E --> F[Text extraction]
-    F --> G[Cleaning]
-    G --> H[Page / heading / clause chunking]
-    H --> I[(DocumentChunks)]
-    I --> J[Hangfire embed job]
-    J --> K[Ollama bge-m3]
-    K --> L[(pgvector)]
-    L --> M[RAG için hazır]
-```
-
-### Kullanıcı Soru-Cevap Süreci
+### Doküman Hazırlama Akışı
 
 ```mermaid
+%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
 flowchart LR
-    A[Kullanıcı sorusu] --> B[Angular Web]
-    B --> C[.NET API]
-    C --> D[Query embedding]
-    D --> E[(pgvector semantic search)]
-    E --> F[Top-K kaynak chunk]
-    F --> G[Kaynaklı prompt]
-    G --> H[Ollama chat model]
-    H --> I[(Sohbet geçmişi)]
-    I --> J[Cevap + kaynak + süre]
+    U[Kullanıcı] --> W[Angular Web]
+    W --> A[.NET API]
+    A --> S[Dosya Depolama]
+    A --> D[(PostgreSQL Doküman)]
+    D --> H[Hangfire İşleri]
+    H --> C[Metin Çıkarma + Parçalama]
+    C --> O[Ollama Embedding]
+    O --> V[(pgvector)]
+    V --> R[RAG için Hazır]
 ```
+
+
+
+1. Kullanıcı dokümanı Angular arayüzünden yükler.
+2. API dosyayı depolama alanına, doküman bilgisini PostgreSQL’e kaydeder.
+3. Metin işleme ve embedding işlemleri Hangfire ile arka planda çalışır.
+4. Dokümandan metin çıkarılır, anlamlı parçalara ayrılır ve Ollama ile vektöre dönüştürülür.
+5. Vektörler pgvector’a yazılır ve doküman RAG için hazır hale gelir.
+
+### Soru-Cevap Akışı
+
+```mermaid
+%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
+flowchart LR
+    U[Kullanıcı] --> W[Angular Web]
+    W --> A[.NET API]
+    A --> E[Soru Embedding]
+    E --> V[(pgvector Arama)]
+    V --> C[İlgili Doküman Parçaları]
+    C --> O[Ollama Chat]
+    O --> R[Cevap + Kaynaklar]
+    R --> H[(Sohbet Geçmişi)]
+    R --> W
+```
+
+1. Kullanıcı sohbet ekranından soru sorar.
+2. API soruyu embedding’e dönüştürür ve pgvector üzerinde semantik arama yapar.
+3. Soruya en yakın doküman parçaları kaynak olarak seçilir.
+4. Kaynaklarla sınırlı prompt Ollama chat modeline gönderilir.
+5. Cevap kaynak bilgileriyle kullanıcıya döner ve sohbet geçmişine kaydedilir.
 
 ### Ana Bileşenler
 
