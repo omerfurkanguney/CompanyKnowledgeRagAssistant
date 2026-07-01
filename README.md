@@ -16,6 +16,8 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 
 <img src="assets/readme/documents.png" alt="Doküman Yönetimi" width="100%">
 
+<img src="assets/readme/documents-2.png" alt="Doküman Yönetimi" width="100%">
+
 ### Sohbet ve RAG Cevabı
 
 <img src="assets/readme/chat.png" alt="Sohbet ve RAG Cevabı" width="100%">
