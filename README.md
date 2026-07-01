@@ -1,20 +1,33 @@
 # Company Knowledge RAG Assistant
 
-Şirket içi dokümanları yükleyip işleyen, PostgreSQL + pgvector üzerinde semantik arama yapan ve Ollama ile kaynaklı cevap üreten açık kaynak RAG asistanı.
+Şirket içi dokümanları yükleyen, işleyen, PostgreSQL + pgvector üzerinde semantik arama yapan ve Ollama ile kaynaklı cevaplar üreten açık kaynaklı bir RAG asistanı projesidir.
 
-Bu proje; .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama ve Hangfire kullanılarak hazırlanmış bir MVP/demo projedir. Amaç; CV ve portföy için gerçekçi bir kurumsal bilgi asistanı senaryosunu uçtan uca göstermektir.
+Bu proje; .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama ve Hangfire kullanılarak geliştirilmiş bir MVP/demo çalışmasıdır.
 
-> Görselleri sonradan eklemek için önerilen klasör: `assets/readme/`
+<a id="on-izleme"></a>
 
 ## Ön İzleme
 
-> Aşağıdaki görsel/GIF dosyalarını eklediğinde GitHub üzerinde doğrudan görünecek.
+![Genel Bakış](assets/readme/home.png)
 
-![Genel Bakış](assets/readme/home-overview.gif)
+![Doküman Yönetimi](assets/readme/documents.png)
 
-![Doküman Yönetimi](assets/readme/documents-page.gif)
+![Sohbet ve RAG Cevabı](assets/readme/chat.png)
 
-![Sohbet ve RAG Cevabı](assets/readme/chat-rag-flow.gif)
+## İçindekiler
+
+1. [Projenin Amacı](#projenin-amaci)
+2. [Öne Çıkan Özellikler](#one-cikan-ozellikler)
+3. [Mimari](#mimari)
+4. [Backend Mimarisi](#backend-mimarisi)
+5. [RAG Akışı](#rag-akisi)
+6. [Kullanılan Teknolojiler](#kullanilan-teknolojiler)
+7. [Lokal Çalıştırma](#lokal-calistirma)
+8. [Veritabanı Migration](#veritabani-migration)
+9. [API Örnekleri](#api-ornekleri)
+10. [Ekranlar](#ekranlar)
+
+<a id="projenin-amaci"></a>
 
 ## Projenin Amacı
 
@@ -26,10 +39,11 @@ Bu proje; .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama
 - LLM cevabını sadece bulunan kaynaklara dayalı şekilde üretmek.
 - Doküman işleme ve embedding işlemlerini arka plan job’larıyla yönetmek.
 
+<a id="one-cikan-ozellikler"></a>
+
 ## Öne Çıkan Özellikler
 
 - Doküman yükleme: PDF ve DOCX dosya desteği.
-- Tekrarlı dosya kontrolü: Aynı dosya adı ve uzantısı tekrar yüklenemez.
 - Metin çıkarma: PDF için PdfPig, DOCX için OpenXML.
 - Chunking: Madde, başlık ve sayfa farkındalığı olan metin parçalama.
 - Embedding: Ollama üzerinden `bge-m3`.
@@ -37,12 +51,13 @@ Bu proje; .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama
 - Semantik arama: PostgreSQL + pgvector.
 - Kaynaklı cevap: Cevap yanında doküman, madde ve sayfa bilgisi.
 - Sohbet geçmişi: Oturum bazlı soru-cevap geçmişi.
-- Soft delete: Sohbet ve doküman kayıtlarında güvenli silme yaklaşımı.
 - Arka plan işleri: Hangfire ile process/embed/retry ve toplu işlemler.
 - API dokümantasyonu: Development ortamında Scalar.
 - Modern frontend: Angular 22 + Angular Material.
 - Docker desteği: Web, API, PostgreSQL ve Ollama servisleri.
 - Production hazırlığı: GHCR image publish ve Ansible deployment akışı.
+
+<a id="mimari"></a>
 
 ## Mimari
 
@@ -60,12 +75,14 @@ flowchart LR
 
 ### Ana Bileşenler
 
-- `CompanyKnowledgeWeb`: Angular 22 frontend uygulaması.
-- `CompanyKnowledgeApi`: .NET 10 Minimal API backend.
+- `Web`: Angular 22 frontend uygulaması.
+- `Api`: .NET 10 Minimal API backend.
 - `PostgreSQL + pgvector`: Doküman, chunk, sohbet ve vektör verileri.
 - `Ollama`: Lokal embedding ve chat modeli.
 - `Hangfire`: Uzun süren doküman işleme ve embedding işleri.
 - `Docker Compose`: Lokal geliştirme ortamı.
+
+<a id="backend-mimarisi"></a>
 
 ## Backend Mimarisi
 
@@ -90,6 +107,8 @@ CompanyKnowledgeApi/
 ```
 
 Bu yaklaşımda amaç, iş kurallarını teknik katmanlara dağıtmak yerine ilgili özelliğin yanında tutmaktır.
+
+<a id="rag-akisi"></a>
 
 ## RAG Akışı
 
@@ -192,6 +211,8 @@ sequenceDiagram
     Api-->>Web: Cevap + kaynaklar
 ```
 
+<a id="kullanilan-teknolojiler"></a>
+
 ## Kullanılan Teknolojiler
 
 ### Backend
@@ -230,6 +251,8 @@ sequenceDiagram
 - Nginx reverse proxy
 - Cloudflare DNS/SSL
 
+<a id="lokal-calistirma"></a>
+
 ## Lokal Çalıştırma
 
 ### Gereksinimler
@@ -264,6 +287,8 @@ docker exec company-knowledge-ollama ollama pull bge-m3
 docker exec company-knowledge-ollama ollama pull qwen2.5:1.5b
 ```
 
+<a id="veritabani-migration"></a>
+
 ## Veritabanı Migration
 
 Migration oluşturma:
@@ -283,6 +308,8 @@ Production için idempotent SQL üretme:
 ```bash
 dotnet ef migrations script --idempotent --project CompanyKnowledgeApi --startup-project CompanyKnowledgeApi --output migration.sql
 ```
+
+<a id="api-ornekleri"></a>
 
 ## API Örnekleri
 
@@ -317,6 +344,8 @@ Content-Type: application/json
   "sessionId": null
 }
 ```
+
+<a id="ekranlar"></a>
 
 ## Ekranlar
 
@@ -354,75 +383,3 @@ Content-Type: application/json
 
 ![Sohbet Ekranı](assets/readme/chat-page.png)
 
-### Ayarlar
-
-- Demo modu bilgisi
-- Kullanılan AI modelleri
-- Veritabanı ve arama bilgisi
-- Chunking yöntemi
-- Sistem yapılandırma özeti
-
-![Ayarlar Ekranı](assets/readme/settings-page.png)
-
-## Deployment Özeti
-
-Production akışı:
-
-1. Kod GitHub’a push edilir.
-2. GitHub Actions Docker image build eder.
-3. Image’lar GHCR’a gönderilir.
-4. Ansible sunucuda Docker Compose dosyasını günceller.
-5. API, web, postgres ve ollama servisleri ayağa kalkar.
-6. Nginx `rag.pdrm.dev` subdomain’ini web ve API container’larına yönlendirir.
-
-GHCR image örnekleri:
-
-```text
-ghcr.io/omerfurkanguney/companyknowledgeragassistant/company-knowledge-api:latest
-ghcr.io/omerfurkanguney/companyknowledgeragassistant/company-knowledge-web:latest
-```
-
-## Production Notları
-
-- Sunucu bilgileri repoda tutulmaz.
-- Production secret değerleri `.env` dosyasıyla sunucuda yönetilir.
-- Hangfire dashboard production ortamında kapalıdır.
-- PostgreSQL, Ollama ve doküman storage için Docker volume kullanılır.
-- Cloudflare + Nginx reverse proxy ile yayınlanır.
-
-## Roadmap
-
-- [x] .NET 10 backend mimarisi
-- [x] PostgreSQL + pgvector
-- [x] Doküman yükleme
-- [x] Text extraction ve chunking
-- [x] Ollama embedding
-- [x] Semantik arama
-- [x] Kaynaklı cevap üretimi
-- [x] Angular frontend
-- [x] Sohbet geçmişi
-- [x] Hangfire job queue
-- [x] Production Docker image publish
-- [x] Ansible deployment hazırlığı
-- [ ] Gelişmiş doküman görüntüleme
-- [ ] Daha gelişmiş kaynak skorlama
-- [ ] Adminsiz production health paneli
-- [ ] Daha gelişmiş chunking stratejileri
-
-## Dokümantasyon
-
-- [Roadmap](docs/company-knowledge-rag-assistant-roadmap.md)
-- [Faz 0 - Mimari Yapısı](docs/faz-0-mimari-yapisi.md)
-- [Faz 1 - PostgreSQL + pgvector](docs/faz-1-postgresql-pgvector.md)
-- [Faz 2 - Doküman Yükleme](docs/faz-2-dokuman-yukleme.md)
-- [Faz 3 - Text Extraction + Chunking](docs/faz-3-text-extraction-chunking.md)
-- [Faz 4 - Ollama Embedding](docs/faz-4-ollama-embedding.md)
-- [Faz 5 - Semantic Search](docs/faz-5-semantic-search.md)
-- [Faz 6 - Kaynaklı Cevap Üretimi](docs/faz-6-kaynakli-cevap-uretimi.md)
-- [Faz 7 - Angular Frontend](docs/faz-7-angular-frontend.md)
-- [Kullanılan Paketler](docs/kullanilan-paketler.md)
-- [Temel Kavramlar](docs/temel-kavramlar.md)
-
-## Lisans
-
-Bu proje açık kaynak ve portföy/demo amaçlı geliştirilmiştir. Lisans bilgisi için repoya eklenecek `LICENSE` dosyası referans alınmalıdır.
