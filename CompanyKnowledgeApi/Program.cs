@@ -5,11 +5,15 @@ using CompanyKnowledgeApi.Features.Documents.UploadDocument;
 using CompanyKnowledgeApi.Features.Search.SemanticSearch;
 using CompanyKnowledgeApi.Infrastructure.Ai.Chat;
 using CompanyKnowledgeApi.Infrastructure.Ai.Embeddings;
+using CompanyKnowledgeApi.Infrastructure.BackgroundJobs;
 using CompanyKnowledgeApi.Infrastructure.Documents.Chunking;
 using CompanyKnowledgeApi.Infrastructure.Documents.Cleaning;
 using CompanyKnowledgeApi.Infrastructure.Documents.Extraction;
 using CompanyKnowledgeApi.Infrastructure.Storage;
 using FluentValidation;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -37,6 +41,7 @@ builder.Services.Configure<DocumentStorageOptions>(builder.Configuration.GetSect
 builder.Services.Configure<DocumentChunkingOptions>(builder.Configuration.GetSection("DocumentChunking"));
 builder.Services.Configure<EmbeddingOptions>(builder.Configuration.GetSection("AI"));
 builder.Services.Configure<ChatOptions>(builder.Configuration.GetSection("AI"));
+builder.Services.Configure<BackgroundJobOptions>(builder.Configuration.GetSection("BackgroundJobs"));
 builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
 builder.Services.AddScoped<ITextExtractor, PdfPigTextExtractor>();
 builder.Services.AddScoped<ITextExtractor, OpenXmlDocxTextExtractor>();
@@ -68,6 +73,27 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseNpgsql(connectionString, npgsqlOptions => npgsqlOptions.UseVector());
 });
+builder.Services.AddHangfire((serviceProvider, configuration) =>
+{
+    var connectionString = serviceProvider
+        .GetRequiredService<IConfiguration>()
+        .GetConnectionString("DefaultConnection");
+
+    configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(connectionString);
+});
+builder.Services.AddHangfireServer((serviceProvider, options) =>
+{
+    var backgroundJobOptions = serviceProvider
+        .GetRequiredService<Microsoft.Extensions.Options.IOptions<BackgroundJobOptions>>()
+        .Value;
+
+    options.WorkerCount = Math.Max(1, backgroundJobOptions.WorkerCount);
+    options.Queues = ["default"];
+});
 
 var app = builder.Build();
 
@@ -75,6 +101,18 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+}
+
+var backgroundJobOptions = app.Services
+    .GetRequiredService<Microsoft.Extensions.Options.IOptions<BackgroundJobOptions>>()
+    .Value;
+
+if (backgroundJobOptions.EnableDashboard && !app.Environment.IsProduction())
+{
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = Array.Empty<IDashboardAuthorizationFilter>()
+    });
 }
 
 app.UseHttpsRedirection();

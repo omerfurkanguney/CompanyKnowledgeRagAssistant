@@ -58,7 +58,7 @@ export class SystemPage {
     {
       icon: 'lock_open',
       title: 'Demo Modu',
-      description: 'Bu MVP açık kaynak ve CV demosu için auth olmadan çalışacak şekilde tasarlandı.',
+      description: 'Bu MVP açık kaynak olarak auth olmadan çalışacak şekilde tasarlandı.',
       items: [
         { label: 'Kimlik doğrulama', value: 'Kapalı' },
         { label: 'Kullanıcı yönetimi', value: 'Kapalı' },
@@ -68,3 +68,4 @@ export class SystemPage {
     },
   ];
 }
+

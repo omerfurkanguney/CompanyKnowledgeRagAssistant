@@ -270,6 +270,15 @@ export class ChatPage implements OnInit {
       });
   }
 
+  onQuestionKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+    this.ask();
+  }
+
   setExample(text: string): void {
     this.question.setValue(text);
   }

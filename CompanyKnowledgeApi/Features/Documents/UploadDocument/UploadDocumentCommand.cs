@@ -23,6 +23,18 @@ public sealed class UploadDocumentCommand(
         }
 
         var file = model.File!;
+        var fileName = Path.GetFileName(file.FileName);
+
+        var fileNameAlreadyExists = await dbContext.Documents
+            .AnyAsync(document =>
+                document.Status != DocumentStatus.Deleted &&
+                document.FileName == fileName,
+                cancellationToken);
+
+        if (fileNameAlreadyExists)
+        {
+            return Results.Conflict($"A document named '{fileName}' already exists.");
+        }
 
         if (model.DepartmentId.HasValue &&
             !await dbContext.Departments.AnyAsync(department => department.Id == model.DepartmentId.Value, cancellationToken))

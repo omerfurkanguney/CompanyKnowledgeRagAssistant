@@ -6,14 +6,15 @@ using CompanyKnowledgeApi.Infrastructure.BackgroundJobs;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace CompanyKnowledgeApi.Features.Ingestion.ProcessDocument;
+namespace CompanyKnowledgeApi.Features.Ingestion.RetryDocument;
 
-public sealed class ProcessDocumentCommand(AppDbContext dbContext, IBackgroundJobClient backgroundJobClient)
-    : ICommand<ProcessDocumentModel, IResult>, IScopedService
+public sealed class RetryDocumentCommand(AppDbContext dbContext, IBackgroundJobClient backgroundJobClient)
+    : ICommand<RetryDocumentModel, IResult>, IScopedService
 {
-    public async Task<IResult> Handle(ProcessDocumentModel model, CancellationToken cancellationToken)
+    public async Task<IResult> Handle(RetryDocumentModel model, CancellationToken cancellationToken)
     {
         var document = await dbContext.Documents
+            .Include(document => document.Chunks)
             .FirstOrDefaultAsync(document => document.Id == model.Id, cancellationToken);
 
         if (document is null || document.Status == DocumentStatus.Deleted)
@@ -21,18 +22,20 @@ public sealed class ProcessDocumentCommand(AppDbContext dbContext, IBackgroundJo
             return Results.NotFound();
         }
 
-        if (document.Status == DocumentStatus.Processing)
+        if (document.Status != DocumentStatus.Failed)
         {
-            return Results.BadRequest("Document processing is already running.");
+            return Results.BadRequest("Only failed documents can be retried.");
         }
 
-        document.Status = DocumentStatus.ProcessingQueued;
+        document.Status = document.Chunks.Count > 0
+            ? DocumentStatus.EmbeddingQueued
+            : DocumentStatus.ProcessingQueued;
         document.FailureReason = null;
         document.UpdatedAt = DateTimeOffset.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var jobId = backgroundJobClient.Enqueue<DocumentIngestionJob>(
-            job => job.ProcessAsync(document.Id, CancellationToken.None));
+            job => job.RetryAsync(document.Id, CancellationToken.None));
 
         return Results.Accepted(
             $"/api/documents/{document.Id}/status",

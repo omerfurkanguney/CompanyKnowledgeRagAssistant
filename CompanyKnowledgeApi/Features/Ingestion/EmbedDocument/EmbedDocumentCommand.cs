@@ -1,19 +1,20 @@
 using CompanyKnowledgeApi.Common.Abstractions;
 using CompanyKnowledgeApi.Database;
 using CompanyKnowledgeApi.Database.Entities;
-using CompanyKnowledgeApi.Infrastructure.Ai.Embeddings;
+using CompanyKnowledgeApi.Features.Ingestion;
+using CompanyKnowledgeApi.Infrastructure.BackgroundJobs;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
-using Pgvector;
 
 namespace CompanyKnowledgeApi.Features.Ingestion.EmbedDocument;
 
-public sealed class EmbedDocumentCommand(AppDbContext dbContext, IEmbeddingService embeddingService)
+public sealed class EmbedDocumentCommand(AppDbContext dbContext, IBackgroundJobClient backgroundJobClient)
     : ICommand<EmbedDocumentModel, IResult>, IScopedService
 {
     public async Task<IResult> Handle(EmbedDocumentModel model, CancellationToken cancellationToken)
     {
         var document = await dbContext.Documents
-            .Include(document => document.Chunks.OrderBy(chunk => chunk.ChunkIndex))
+            .Include(document => document.Chunks)
             .FirstOrDefaultAsync(document => document.Id == model.Id, cancellationToken);
 
         if (document is null || document.Status == DocumentStatus.Deleted)
@@ -21,56 +22,26 @@ public sealed class EmbedDocumentCommand(AppDbContext dbContext, IEmbeddingServi
             return Results.NotFound();
         }
 
+        if (document.Status == DocumentStatus.Embedding)
+        {
+            return Results.BadRequest("Document embedding is already running.");
+        }
+
         if (document.Chunks.Count == 0)
         {
             return Results.BadRequest("Document has no chunks. Process the document before embedding.");
         }
 
-        document.Status = DocumentStatus.Embedding;
+        document.Status = DocumentStatus.EmbeddingQueued;
         document.FailureReason = null;
         document.UpdatedAt = DateTimeOffset.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        try
-        {
-            var chunks = document.Chunks
-                .OrderBy(chunk => chunk.ChunkIndex)
-                .ToList();
+        var jobId = backgroundJobClient.Enqueue<DocumentIngestionJob>(
+            job => job.EmbedAsync(document.Id, CancellationToken.None));
 
-            var embeddings = await embeddingService.EmbedAsync(
-                chunks.Select(chunk => chunk.Content).ToList(),
-                cancellationToken);
-
-            for (var index = 0; index < chunks.Count; index++)
-            {
-                chunks[index].Embedding = new Vector(embeddings[index]);
-            }
-
-            document.Status = DocumentStatus.Indexed;
-            document.FailureReason = null;
-            document.UpdatedAt = DateTimeOffset.UtcNow;
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-
-            return Results.Ok(new EmbedDocumentResponse(
-                DocumentId: document.Id,
-                Status: document.Status.ToString(),
-                EmbeddedChunkCount: chunks.Count,
-                FailureReason: null));
-        }
-        catch (Exception exception)
-        {
-            document.Status = DocumentStatus.Failed;
-            document.FailureReason = exception.Message;
-            document.UpdatedAt = DateTimeOffset.UtcNow;
-
-            await dbContext.SaveChangesAsync(CancellationToken.None);
-
-            return Results.Ok(new EmbedDocumentResponse(
-                DocumentId: document.Id,
-                Status: document.Status.ToString(),
-                EmbeddedChunkCount: 0,
-                FailureReason: document.FailureReason));
-        }
+        return Results.Accepted(
+            $"/api/documents/{document.Id}/status",
+            new QueueDocumentJobResponse(document.Id, document.Status.ToString(), jobId));
     }
 }

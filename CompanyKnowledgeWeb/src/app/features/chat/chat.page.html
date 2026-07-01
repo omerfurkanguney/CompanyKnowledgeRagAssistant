@@ -102,10 +102,10 @@
     <footer class="composer">
       <textarea
         [formControl]="question"
+        (keydown)="onQuestionKeydown($event)"
         rows="3"
         placeholder="Şirket politika ve süreçleri hakkında soru sor..."></textarea>
       <div class="composer-footer">
-        <button mat-icon-button type="button"><mat-icon>attach_file</mat-icon></button>
         <span>Enter ile gönder · Shift + Enter ile yeni satır</span>
         <em>{{ question.value.length }} / 2000</em>
         <button mat-flat-button type="button" class="send-button" (click)="ask()" [disabled]="loading()">

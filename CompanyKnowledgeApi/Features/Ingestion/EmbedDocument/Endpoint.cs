@@ -1,3 +1,5 @@
+using CompanyKnowledgeApi.Features.Ingestion;
+
 namespace CompanyKnowledgeApi.Features.Ingestion.EmbedDocument;
 
 public static class Endpoint
@@ -10,8 +12,8 @@ public static class Endpoint
                 CancellationToken cancellationToken) =>
             command.Handle(new EmbedDocumentModel(id), cancellationToken))
             .WithName("EmbedDocument")
-            .WithSummary("Generates embeddings for document chunks using Ollama.")
-            .Produces<EmbedDocumentResponse>()
+            .WithSummary("Queues embedding generation for document chunks using Ollama.")
+            .Produces<QueueDocumentJobResponse>(StatusCodes.Status202Accepted)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 

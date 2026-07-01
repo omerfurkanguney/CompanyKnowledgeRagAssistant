@@ -6,14 +6,15 @@ import {
   ApiInfo,
   AskQuestionRequest,
   AskQuestionResponse,
+  BulkQueueDocumentsRequest,
+  BulkQueueDocumentsResponse,
   ChatSessionDetail,
   ChatSessionSummary,
   DepartmentLookup,
   DocumentCategoryLookup,
   DocumentItem,
-  EmbedDocumentResponse,
   HomeSummary,
-  ProcessDocumentResponse,
+  QueueDocumentJobResponse,
   SystemHealth,
   UploadDocumentResponse,
 } from './api.models';
@@ -72,12 +73,20 @@ export class ApiService {
     return this.http.post<UploadDocumentResponse>(`${this.apiUrl}/documents`, formData);
   }
 
-  processDocument(documentId: string): Observable<ProcessDocumentResponse> {
-    return this.http.post<ProcessDocumentResponse>(`${this.apiUrl}/documents/${documentId}/process`, {});
+  processDocument(documentId: string): Observable<QueueDocumentJobResponse> {
+    return this.http.post<QueueDocumentJobResponse>(`${this.apiUrl}/documents/${documentId}/process`, {});
   }
 
-  embedDocument(documentId: string): Observable<EmbedDocumentResponse> {
-    return this.http.post<EmbedDocumentResponse>(`${this.apiUrl}/documents/${documentId}/embed`, {});
+  embedDocument(documentId: string): Observable<QueueDocumentJobResponse> {
+    return this.http.post<QueueDocumentJobResponse>(`${this.apiUrl}/documents/${documentId}/embed`, {});
+  }
+
+  retryDocument(documentId: string): Observable<QueueDocumentJobResponse> {
+    return this.http.post<QueueDocumentJobResponse>(`${this.apiUrl}/documents/${documentId}/retry`, {});
+  }
+
+  queueDocumentJobs(request: BulkQueueDocumentsRequest): Observable<BulkQueueDocumentsResponse> {
+    return this.http.post<BulkQueueDocumentsResponse>(`${this.apiUrl}/documents/bulk-jobs`, request);
   }
 
   deleteDocument(documentId: string): Observable<void> {

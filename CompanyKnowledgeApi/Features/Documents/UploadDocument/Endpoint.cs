@@ -17,6 +17,7 @@ public static class Endpoint
             .WithSummary("Uploads a PDF or DOCX document.")
             .Accepts<IFormFile>("multipart/form-data")
             .Produces<UploadDocumentResponse>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status409Conflict)
             .ProducesValidationProblem()
             .DisableAntiforgery();
 

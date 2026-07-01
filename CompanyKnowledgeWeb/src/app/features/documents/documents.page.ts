@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -27,6 +29,7 @@ import {
     MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
+    MatPaginatorModule,
     MatProgressBarModule,
     MatSelectModule,
     MatSnackBarModule,
@@ -36,7 +39,7 @@ import {
   styleUrl: './documents.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentsPage implements OnInit {
+export class DocumentsPage implements OnInit, OnDestroy {
   private readonly api = inject(ApiService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -46,12 +49,15 @@ export class DocumentsPage implements OnInit {
   protected readonly loading = signal(false);
   protected readonly uploading = signal(false);
   protected readonly workingDocumentId = signal<string | null>(null);
+  protected readonly bulkActionRunning = signal(false);
   protected readonly departments = signal<DepartmentLookup[]>([]);
   protected readonly categories = signal<DocumentCategoryLookup[]>([]);
   protected readonly searchTerm = signal('');
   protected readonly selectedCategory = signal('');
   protected readonly selectedFileType = signal('');
   protected readonly selectedStatus = signal('');
+  protected readonly pageIndex = signal(0);
+  protected readonly pageSize = 10;
   protected readonly displayedColumns = ['fileName', 'type', 'createdAt', 'status', 'actions'];
   protected readonly indexedCount = computed(() => this.documents().filter((document) => document.status === 'Indexed').length);
   protected readonly processedCount = computed(() =>
@@ -88,10 +94,21 @@ export class DocumentsPage implements OnInit {
       return matchesSearch && matchesCategory && matchesFileType && matchesStatus;
     });
   });
+  protected readonly pagedDocuments = computed(() => {
+    const startIndex = this.pageIndex() * this.pageSize;
+
+    return this.filteredDocuments().slice(startIndex, startIndex + this.pageSize);
+  });
+
+  private pollingTimerId: number | null = null;
 
   ngOnInit(): void {
     this.loadLookups();
     this.loadDocuments();
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   loadLookups(): void {
@@ -115,6 +132,7 @@ export class DocumentsPage implements OnInit {
         next: (documents) => {
           this.documents.set(documents);
           this.selectedDocument.set(documents[0] ?? null);
+          this.syncPolling();
         },
         error: () => this.snackBar.open('Doküman listesi alınamadı.', 'Kapat', { duration: 4000 }),
       });
@@ -148,7 +166,13 @@ export class DocumentsPage implements OnInit {
           this.snackBar.open('Doküman yüklendi. Metin işleme bekliyor.', 'Kapat', { duration: 3000 });
           this.loadDocuments();
         },
-        error: () => this.snackBar.open('Upload başarısız.', 'Kapat', { duration: 4000 }),
+        error: (error: HttpErrorResponse) => {
+          const message = error.status === 409
+            ? 'Aynı dosya adına sahip bir doküman zaten var.'
+            : 'Upload başarısız.';
+
+          this.snackBar.open(message, 'Kapat', { duration: 4000 });
+        },
       });
   }
 
@@ -156,22 +180,67 @@ export class DocumentsPage implements OnInit {
     this.selectedDocument.set(document);
   }
 
+  updateSearchTerm(value: string): void {
+    this.searchTerm.set(value);
+    this.resetPagination();
+  }
+
+  updateSelectedCategory(value: string): void {
+    this.selectedCategory.set(value);
+    this.resetPagination();
+  }
+
+  updateSelectedFileType(value: string): void {
+    this.selectedFileType.set(value);
+    this.resetPagination();
+  }
+
+  updateSelectedStatus(value: string): void {
+    this.selectedStatus.set(value);
+    this.resetPagination();
+  }
+
+  updatePage(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+  }
+
   process(document: DocumentItem): void {
     this.runDocumentAction(
       document.id,
       () => this.api.processDocument(document.id),
-      'Doküman işlendi. Embedding için hazır.',
-      'Processing',
-      'Metin işleme başlatıldı.');
+      'Doküman metin işleme kuyruğuna alındı.',
+      'ProcessingQueued',
+      'Metin işleme kuyruğa alındı.');
   }
 
   embed(document: DocumentItem): void {
     this.runDocumentAction(
       document.id,
       () => this.api.embedDocument(document.id),
-      'Embedding tamamlandı. Doküman arama için hazır.',
-      'Embedding',
-      'Embedding başlatıldı. Bu işlem biraz sürebilir.');
+      'Embedding kuyruğuna alındı.',
+      'EmbeddingQueued',
+      'Embedding kuyruğa alındı. Bu işlem biraz sürebilir.');
+  }
+
+  retry(document: DocumentItem): void {
+    this.runDocumentAction(
+      document.id,
+      () => this.api.retryDocument(document.id),
+      'Doküman tekrar deneme kuyruğuna alındı.',
+      document.chunkCount > 0 ? 'EmbeddingQueued' : 'ProcessingQueued',
+      'Tekrar deneme kuyruğa alındı.');
+  }
+
+  bulkProcessPending(): void {
+    this.runBulkAction('process', 'Bekleyen dokümanlar metin işleme kuyruğuna alındı.');
+  }
+
+  bulkEmbedPending(): void {
+    this.runBulkAction('embed', 'Metni hazır dokümanlar embedding kuyruğuna alındı.');
+  }
+
+  bulkRetryFailed(): void {
+    this.runBulkAction('retry', 'Hatalı dokümanlar tekrar deneme kuyruğuna alındı.');
   }
 
   delete(document: DocumentItem): void {
@@ -237,8 +306,10 @@ export class DocumentsPage implements OnInit {
   statusLabel(status: string): string {
     const labels: Record<string, string> = {
       Uploaded: 'Yüklendi',
+      ProcessingQueued: 'İşlem Kuyruğunda',
       Processing: 'İşleniyor',
       Processed: 'İşlendi',
+      EmbeddingQueued: 'Embed Kuyruğunda',
       Embedding: 'Embedding',
       Indexed: 'İndekslendi',
       Failed: 'Hata',
@@ -251,8 +322,10 @@ export class DocumentsPage implements OnInit {
   statusHint(status: string): string {
     const hints: Record<string, string> = {
       Uploaded: 'Metin işleme bekliyor',
+      ProcessingQueued: 'Sırada bekliyor',
       Processing: 'Chunk üretiliyor',
       Processed: 'Embed bekliyor',
+      EmbeddingQueued: 'Sırada bekliyor',
       Embedding: 'Vektör üretiliyor',
       Indexed: 'Hazır',
       Failed: 'Tekrar denenebilir',
@@ -267,11 +340,19 @@ export class DocumentsPage implements OnInit {
   }
 
   canProcess(document: DocumentItem): boolean {
-    return document.status === 'Uploaded' || document.status === 'Failed';
+    return document.status === 'Uploaded' || document.status === 'Failed' || document.status === 'ProcessingQueued';
   }
 
   canEmbed(document: DocumentItem): boolean {
-    return document.status === 'Processed' || (document.status === 'Failed' && document.chunkCount > 0);
+    return document.status === 'Processed'
+      || document.status === 'EmbeddingQueued'
+      || (document.status === 'Failed' && document.chunkCount > 0);
+  }
+
+  canRetry(document: DocumentItem): boolean {
+    return document.status === 'Failed'
+      || document.status === 'ProcessingQueued'
+      || document.status === 'EmbeddingQueued';
   }
 
   private runDocumentAction<T>(
@@ -295,6 +376,7 @@ export class DocumentsPage implements OnInit {
       .subscribe({
         next: () => {
           this.snackBar.open(successMessage, 'Kapat', { duration: 3000 });
+          this.syncPolling();
           this.loadDocuments();
         },
         error: () => {
@@ -321,5 +403,45 @@ export class DocumentsPage implements OnInit {
     if (selectedDocument?.id === documentId) {
       this.selectedDocument.set(updatedDocuments.find((document) => document.id === documentId) ?? selectedDocument);
     }
+  }
+
+  private runBulkAction(action: 'process' | 'embed' | 'retry', successMessage: string): void {
+    this.bulkActionRunning.set(true);
+    this.api
+      .queueDocumentJobs({ action, onlyPending: true })
+      .pipe(finalize(() => this.bulkActionRunning.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.snackBar.open(`${successMessage} (${response.queuedCount})`, 'Kapat', { duration: 3500 });
+          this.loadDocuments();
+          this.syncPolling();
+        },
+        error: () => this.snackBar.open('Toplu işlem başarısız.', 'Kapat', { duration: 4000 }),
+      });
+  }
+
+  private syncPolling(): void {
+    const hasActiveJobs = this.documents().some((document) =>
+      ['ProcessingQueued', 'Processing', 'EmbeddingQueued', 'Embedding'].includes(document.status));
+
+    if (hasActiveJobs && this.pollingTimerId === null) {
+      this.pollingTimerId = window.setInterval(() => this.loadDocuments(), 5000);
+      return;
+    }
+
+    if (!hasActiveJobs) {
+      this.stopPolling();
+    }
+  }
+
+  private stopPolling(): void {
+    if (this.pollingTimerId !== null) {
+      window.clearInterval(this.pollingTimerId);
+      this.pollingTimerId = null;
+    }
+  }
+
+  private resetPagination(): void {
+    this.pageIndex.set(0);
   }
 }

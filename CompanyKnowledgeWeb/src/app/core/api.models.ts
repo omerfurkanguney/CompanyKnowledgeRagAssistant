@@ -64,6 +64,24 @@ export interface EmbedDocumentResponse {
   failureReason: string | null;
 }
 
+export interface QueueDocumentJobResponse {
+  documentId: string;
+  status: string;
+  jobId: string;
+}
+
+export interface BulkQueueDocumentsRequest {
+  action: 'process' | 'embed' | 'retry';
+  documentIds?: string[] | null;
+  onlyPending: boolean;
+}
+
+export interface BulkQueueDocumentsResponse {
+  action: string;
+  queuedCount: number;
+  documentIds: string[];
+}
+
 export interface ApiInfo {
   name: string;
   environment: string;

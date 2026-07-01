@@ -1,3 +1,5 @@
+using CompanyKnowledgeApi.Features.Ingestion;
+
 namespace CompanyKnowledgeApi.Features.Ingestion.ProcessDocument;
 
 public static class Endpoint
@@ -10,8 +12,8 @@ public static class Endpoint
                 CancellationToken cancellationToken) =>
             command.Handle(new ProcessDocumentModel(id), cancellationToken))
             .WithName("ProcessDocument")
-            .WithSummary("Extracts text from an uploaded document and creates chunks.")
-            .Produces<ProcessDocumentResponse>()
+            .WithSummary("Queues text extraction and chunking for an uploaded document.")
+            .Produces<QueueDocumentJobResponse>(StatusCodes.Status202Accepted)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 

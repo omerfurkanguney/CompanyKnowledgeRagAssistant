@@ -25,6 +25,8 @@ services:
       AI__Temperature: 0.2
       AI__RequestTimeoutSeconds: 300
       AI__MaxOutputTokens: 256
+      BackgroundJobs__WorkerCount: 1
+      BackgroundJobs__EnableDashboard: true
     ports:
       - "8080:8080"
     volumes:
