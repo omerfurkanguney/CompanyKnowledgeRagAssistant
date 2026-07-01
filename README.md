@@ -10,17 +10,25 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 
 ### Ana Sayfa
 
-<img src="assets/readme/home.png" alt="Ana Sayfa" width="100%">
+<a href="assets/readme/home.png">
+  <img src="assets/readme/home.png" alt="Ana Sayfa" width="100%">
+</a>
 
 ### Doküman Yönetimi
 
-<img src="assets/readme/documents.png" alt="Doküman Yönetimi" width="100%">
+<a href="assets/readme/documents.png">
+  <img src="assets/readme/documents.png" alt="Doküman Yönetimi" width="100%">
+</a>
 
-<img src="assets/readme/documents-2.png" alt="Doküman Yönetimi" width="100%">
+<a href="assets/readme/documents-2.png">
+  <img src="assets/readme/documents-2.png" alt="Doküman Yönetimi Detay" width="100%">
+</a>
 
 ### Sohbet ve RAG Cevabı
 
-<img src="assets/readme/chat.png" alt="Sohbet ve RAG Cevabı" width="100%">
+<a href="assets/readme/chat.png">
+  <img src="assets/readme/chat.png" alt="Sohbet ve RAG Cevabı" width="100%">
+</a>
 
 ## İçindekiler
 
