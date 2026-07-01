@@ -75,16 +75,39 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 
 ## Mimari
 
+Proje iki ana akış üzerine kuruludur: dokümanların RAG için hazırlanması ve kullanıcının sorusuna kaynaklı cevap üretilmesi.
+
+### Doküman Kayıt ve Hazırlama Süreci
+
 ```mermaid
 flowchart LR
-    U[User] --> W[Angular Web]
-    W --> A[.NET 10 API]
-    A --> P[(PostgreSQL 18 + pgvector)]
-    A --> O[Ollama]
-    A --> H[Hangfire Jobs]
-    H --> P
-    H --> O
-    A --> S[Local File Storage]
+    A[Doküman yükleme] --> B[API kontrolü]
+    B --> C[Local storage]
+    C --> D[(Document kaydı)]
+    D --> E[Hangfire process job]
+    E --> F[Text extraction]
+    F --> G[Cleaning]
+    G --> H[Page / heading / clause chunking]
+    H --> I[(DocumentChunks)]
+    I --> J[Hangfire embed job]
+    J --> K[Ollama bge-m3]
+    K --> L[(pgvector)]
+    L --> M[RAG için hazır]
+```
+
+### Kullanıcı Soru-Cevap Süreci
+
+```mermaid
+flowchart LR
+    A[Kullanıcı sorusu] --> B[Angular Web]
+    B --> C[.NET API]
+    C --> D[Query embedding]
+    D --> E[(pgvector semantic search)]
+    E --> F[Top-K kaynak chunk]
+    F --> G[Kaynaklı prompt]
+    G --> H[Ollama chat model]
+    H --> I[(Sohbet geçmişi)]
+    I --> J[Cevap + kaynak + süre]
 ```
 
 ### Ana Bileşenler
