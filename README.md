@@ -20,7 +20,7 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
   <img src="assets/readme/documents.png" alt="Doküman Yönetimi" width="100%">
 </a>
 
-<a href="assets/readme/documents-2.png">
+<a href="assets/readme/document-2.png">
   <img src="assets/readme/documents-2.png" alt="Doküman Yönetimi Detay" width="100%">
 </a>
 
