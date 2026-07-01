@@ -2,17 +2,23 @@
 
 Şirket içi dokümanları yükleyen, işleyen, PostgreSQL + pgvector üzerinde semantik arama yapan ve Ollama ile kaynaklı cevaplar üreten açık kaynaklı bir RAG asistanı projesidir.
 
-Bu proje; .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama ve Hangfire kullanılarak geliştirilmiş bir MVP/demo çalışmasıdır.
+Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama ve Hangfire kullanılarak geliştirilmiş bir MVP/demo çalışmasıdır.
 
 <a id="on-izleme"></a>
 
 ## Ön İzleme
 
-![Genel Bakış](assets/readme/home.png)
+### Ana Sayfa
 
-![Doküman Yönetimi](assets/readme/documents.png)
+<img src="assets/readme/home.png" alt="Ana Sayfa" width="100%">
 
-![Sohbet ve RAG Cevabı](assets/readme/chat.png)
+### Doküman Yönetimi
+
+<img src="assets/readme/documents.png" alt="Doküman Yönetimi" width="100%">
+
+### Sohbet ve RAG Cevabı
+
+<img src="assets/readme/chat.png" alt="Sohbet ve RAG Cevabı" width="100%">
 
 ## İçindekiler
 
@@ -24,8 +30,6 @@ Bu proje; .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama
 6. [Kullanılan Teknolojiler](#kullanilan-teknolojiler)
 7. [Lokal Çalıştırma](#lokal-calistirma)
 8. [Veritabanı Migration](#veritabani-migration)
-9. [API Örnekleri](#api-ornekleri)
-10. [Ekranlar](#ekranlar)
 
 <a id="projenin-amaci"></a>
 
@@ -308,78 +312,3 @@ Production için idempotent SQL üretme:
 ```bash
 dotnet ef migrations script --idempotent --project CompanyKnowledgeApi --startup-project CompanyKnowledgeApi --output migration.sql
 ```
-
-<a id="api-ornekleri"></a>
-
-## API Örnekleri
-
-### Doküman Yükleme
-
-```http
-POST /api/documents
-Content-Type: multipart/form-data
-```
-
-### Dokümanı İşleme
-
-```http
-POST /api/documents/{documentId}/process
-```
-
-### Dokümanı Embed Etme
-
-```http
-POST /api/documents/{documentId}/embed
-```
-
-### Soru Sorma
-
-```http
-POST /api/chat/ask
-Content-Type: application/json
-
-{
-  "question": "Yıllık izin kaç gün önceden talep edilmelidir?",
-  "topK": 4,
-  "sessionId": null
-}
-```
-
-<a id="ekranlar"></a>
-
-## Ekranlar
-
-### Genel Bakış
-
-- Toplam doküman sayısı
-- Departman dağılımı
-- Bugünkü sorgu sayısı
-- Son eklenen dokümanlar
-- Önerilen sorular
-- Sohbete yönlendirme
-
-![Genel Bakış Ekranı](assets/readme/home-page.png)
-
-### Dokümanlar
-
-- Doküman yükleme
-- Kategori ve departman seçimi
-- Metni işleme
-- Embedding oluşturma
-- Hataları tekrar deneme
-- Toplu işlem butonları
-- 10’lu frontend pagination
-
-![Dokümanlar Ekranı](assets/readme/documents-page.png)
-
-### Sohbet
-
-- Sohbet geçmişi
-- Bugün / bu hafta / tümü filtresi
-- Aynı sohbet altında çoklu soru-cevap
-- Kaynaklı cevap üretimi
-- Önerilen RAG test soruları
-- Son cevap süresi
-
-![Sohbet Ekranı](assets/readme/chat-page.png)
-
