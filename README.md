@@ -6,8 +6,6 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 
 <a id="on-izleme"></a>
 
-## Ön İzleme
-
 ### Ana Sayfa
 
 <a href="assets/readme/home.png">
@@ -21,7 +19,7 @@ Bu proje .NET 10 backend, Angular 22 frontend, PostgreSQL 18 + pgvector, Ollama 
 </a>
 
 <a href="assets/readme/document-2.png">
-  <img src="assets/readme/documents-2.png" alt="Doküman Yönetimi Detay" width="100%">
+  <img src="assets/readme/document-2.png" alt="Doküman Yönetimi Detay" width="100%">
 </a>
 
 ### Sohbet ve RAG Cevabı
